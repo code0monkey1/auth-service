@@ -1,12 +1,18 @@
+import "reflect-metadata";
 import express, { NextFunction, Request, Response } from "express";
 import logger from "./config/logger";
 import { HttpError } from "http-errors";
 const app = express();
+import registerRoute from "./routes/registerRoute";
 import "express-async-errors";
 
 app.get("/data", (req, res) => {
     res.json({ data: "will  crash again" });
 });
+
+// routes
+
+app.use("/auth", registerRoute);
 
 app.use(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
