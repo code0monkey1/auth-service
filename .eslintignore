@@ -3,3 +3,5 @@ node_modules
 .eslintrc.cjs
 jest.config.js
 test
+package.json
+package-lock.json
