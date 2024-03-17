@@ -6,6 +6,8 @@ const app = express();
 import registerRoute from "./routes/registerRoute";
 import "express-async-errors";
 
+app.use(express.json());
+
 app.get("/data", (req, res) => {
     res.json({ data: "will  crash again" });
 });
