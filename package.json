@@ -4,15 +4,15 @@
     "description": "generic template for creating nodejs project using typescript",
     "main": "index.js",
     "scripts": {
-        "dev": "cross-env NODE_ENV=dev nodemon src/server.ts",
-        "test": "cross-env NODE_ENV=test jest --watchAll --runInBand --coverage",
+        "dev": "NODE_ENV=dev nodemon src/server.ts",
+        "test": " NODE_ENV=test jest --watchAll --runInBand --coverage",
         "format:check": "prettier . --check",
         "format:fix": "prettier . --write",
         "test:prod": "jest --runInBand",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "prepare": "husky",
-        "start": "cross-env NODE_ENV=prod ts-node src/index.ts",
+        "start": " NODE_ENV=prod ts-node src/index.ts",
         "typeorm": "typeorm-ts-node-commonjs"
     },
     "author": "Chiranjeev Thomas",
