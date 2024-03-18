@@ -4,6 +4,7 @@ import { DataSource } from "typeorm";
 import { AppDataSource } from "../../src/config/data-source";
 import { User } from "../../src/entity/User";
 import { ROLES } from "../../src/constants";
+import bcrypt from "bcrypt";
 
 const api = supertest(app);
 const BASE_URL = "/auth";
@@ -27,12 +28,28 @@ describe("POST", () => {
 
     describe("/auth/register", () => {
         it("should return status code 201", async () => {
-            await api.post(BASE_URL + "/register").expect(201);
+            const user = {
+                firstName: "a",
+                lastName: "b",
+                email: "c",
+                password: "e",
+            };
+            await api
+                .post(BASE_URL + "/register")
+                .send(user)
+                .expect(201);
         });
 
         it("should return json format data", async () => {
+            const user = {
+                firstName: "a",
+                lastName: "b",
+                email: "c",
+                password: "e",
+            };
             await api
                 .post(BASE_URL + "/register")
+                .send(user)
                 .expect("Content-Type", /json/);
         });
 
@@ -109,6 +126,62 @@ describe("POST", () => {
 
             //check user is the same
             expect(users[0].role).toBe(ROLES.CUSTOMER);
+        });
+
+        it("should store hashed password in the database", async () => {
+            //arrange
+            const user = {
+                firstName: "a",
+                lastName: "b",
+                email: "c",
+                password: "e",
+            };
+
+            //act
+            await api
+                .post(BASE_URL + "/register")
+                .send(user)
+                .expect("Content-Type", /json/);
+
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+
+            //assert
+            expect(users).toHaveLength(1);
+
+            //check user is the same
+
+            expect(users[0].hashedPassword).toBeDefined();
+
+            expect(
+                await bcrypt.compare(user.password, users[0].hashedPassword),
+            ).toBeTruthy();
+        });
+
+        it("should return 400 status code , if email exists", async () => {
+            //arrange
+            const user = {
+                firstName: "a",
+                lastName: "b",
+                email: "c",
+                password: "p",
+            };
+
+            await connection.getRepository(User).save(user);
+
+            const repo = connection.getRepository(User);
+
+            const usersBefore = await repo.find();
+
+            //act // assert
+            await api
+                .post(BASE_URL + "/register")
+                .send(user)
+                .expect(400);
+
+            const usersAfter = await repo.find();
+
+            expect(usersBefore.length).toBe(usersAfter.length);
         });
     });
 });

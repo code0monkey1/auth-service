@@ -11,7 +11,7 @@ export class User {
     @Column({ nullable: true })
     lastName: string;
 
-    @Column({ nullable: true })
+    @Column({ unique: true })
     email: string;
 
     @Column({ nullable: true })
@@ -19,4 +19,7 @@ export class User {
 
     @Column({ nullable: true })
     role: string;
+
+    @Column({ nullable: true })
+    hashedPassword: string;
 }
