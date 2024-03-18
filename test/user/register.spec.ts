@@ -183,5 +183,25 @@ describe("POST", () => {
 
             expect(usersBefore.length).toBe(usersAfter.length);
         });
+        it("should return 400 status code , if email not in request", async () => {
+            //arrange
+            const user = {
+                firstName: "a",
+                lastName: "b",
+                password: "p",
+            };
+
+            //act // assert
+            const response = await api
+                .post(BASE_URL + "/register")
+                .send(user)
+                .expect(400);
+
+            const repo = connection.getRepository(User);
+            const users = await repo.find();
+
+            expect(users.length).toBe(0);
+            expect(response.body.errors[0].msg).toBe("email is missing");
+        });
     });
 });
