@@ -19,16 +19,19 @@ export class UserService {
         }
 
         const { firstName, lastName, email } = userData;
+
         //hash the password
         const hashedPassword = await bcrypt.hash(userData.password, 10);
         try {
-            await this.userRepository.save({
+            const user = await this.userRepository.save({
                 firstName,
                 lastName,
                 email,
                 role: ROLES.CUSTOMER,
                 hashedPassword,
             });
+
+            return user as User & { id: string };
         } catch (e) {
             const error = createHttpError(
                 500,

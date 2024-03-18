@@ -5,13 +5,14 @@ import { AppDataSource } from "../../src/config/data-source";
 import { User } from "../../src/entity/User";
 import { ROLES } from "../../src/constants";
 import bcrypt from "bcrypt";
+import { isJwt } from "../utils";
 
 const api = supertest(app);
 const BASE_URL = "/auth";
 
-describe("POST", () => {
-    let connection: DataSource;
+let connection: DataSource;
 
+describe("POST", () => {
     beforeAll(async () => {
         connection = await AppDataSource.initialize();
     });
@@ -26,182 +27,329 @@ describe("POST", () => {
         await connection.destroy();
     });
 
-    describe("/auth/register", () => {
-        it("should return status code 201", async () => {
-            const user = {
-                firstName: "a",
-                lastName: "b",
-                email: "c",
-                password: "e",
-            };
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(201);
+    it("should return status code 201", async () => {
+        const user = {
+            firstName: "a",
+            lastName: "b",
+            email: "c",
+            password: "12345678",
+        };
+        await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect(201);
+    });
+
+    it("should return json format data", async () => {
+        const user = {
+            firstName: "a",
+            lastName: "b",
+            email: "c",
+            password: "12345678",
+        };
+        await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect("Content-Type", /json/);
+    });
+
+    it("should return create a new user", async () => {
+        const user = {
+            firstName: "a",
+            lastName: "b",
+            email: "c",
+            password: "12345678",
+        };
+        await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect("Content-Type", /json/);
+
+        const userRepository = await connection.getRepository(User);
+        const users = await userRepository.find();
+
+        expect(users).toHaveLength(1);
+
+        //check user is the same
+
+        expect(users[0].firstName).toBe(user.firstName);
+        expect(users[0].lastName).toBe(user.lastName);
+        expect(users[0].email).toBe(user.email);
+    });
+
+    it("should create the id of the user", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            lastName: "b",
+            email: "c",
+            password: "12345678",
+        };
+
+        //act
+        await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect("Content-Type", /json/);
+
+        const userRepository = await connection.getRepository(User);
+        const users = await userRepository.find();
+
+        //assert
+        expect(users).toHaveLength(1);
+
+        //check user is the same
+
+        expect(users[0].id).toBeDefined();
+    });
+
+    it("should assign user a customer role", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            lastName: "b",
+            email: "c",
+            password: "12345678",
+        };
+
+        //act
+        await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect("Content-Type", /json/);
+
+        const userRepository = await connection.getRepository(User);
+        const users = await userRepository.find();
+
+        //assert
+        expect(users).toHaveLength(1);
+
+        //check user is the same
+        expect(users[0].role).toBe(ROLES.CUSTOMER);
+    });
+
+    it("should store hashed password in the database", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            lastName: "b",
+            email: "c",
+            password: "12345678",
+        };
+
+        //act
+        await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect("Content-Type", /json/);
+
+        const userRepository = await connection.getRepository(User);
+        const users = await userRepository.find();
+
+        //assert
+        expect(users).toHaveLength(1);
+
+        //check user is the same
+
+        expect(users[0].hashedPassword).toBeDefined();
+
+        expect(
+            await bcrypt.compare(user.password, users[0].hashedPassword),
+        ).toBeTruthy();
+    });
+
+    it("should return 400 status code , if email exists", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            lastName: "b",
+            email: "c",
+            password: "12345678",
+        };
+
+        await connection.getRepository(User).save(user);
+
+        const repo = await connection.getRepository(User);
+
+        const usersBefore = await repo.find();
+
+        //act // assert
+        await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect(400);
+
+        const usersAfter = await repo.find();
+
+        expect(usersBefore.length).toBe(usersAfter.length);
+    });
+    it("should return 400 status code , if email not in request", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            lastName: "b",
+            password: "12345678",
+        };
+
+        //act // assert
+        const response = await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect(400);
+
+        const repo = await connection.getRepository(User);
+        const users = await repo.find();
+
+        expect(response.body.errors[0].msg).toBe("email is missing");
+        expect(users.length).toBe(0);
+    });
+
+    it("should return accessToken and refreshToken inside a cookie", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            lastName: "b",
+            password: "12345678",
+            email: "vodsfonn@gmail.com",
+        };
+
+        //act
+        const response = await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect(201);
+
+        interface Headers {
+            ["set-cookie"]: string[];
+        }
+        let accessToken = "";
+        let refreshToken = "";
+
+        // assert
+        expect(response.headers["set-cookie"]).toBeDefined();
+
+        const cookies =
+            (response.headers as unknown as Headers)["set-cookie"] || [];
+
+        cookies.forEach((c) => {
+            if (c.startsWith("accessToken="))
+                accessToken = c.split(";")[0].split("=")[1];
+
+            if (c.startsWith("refreshToken="))
+                refreshToken = c.split(";")[0].split("=")[1];
         });
 
-        it("should return json format data", async () => {
-            const user = {
-                firstName: "a",
-                lastName: "b",
-                email: "c",
-                password: "e",
-            };
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
-        });
+        expect(accessToken).toBeTruthy();
+        expect(refreshToken).toBeTruthy();
 
-        it("should return create a new user", async () => {
-            const user = {
-                firstName: "a",
-                lastName: "b",
-                email: "c",
-                password: "e",
-            };
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
+        expect(isJwt(accessToken)).toBeTruthy();
+        expect(isJwt(refreshToken)).toBeTruthy();
+    });
 
-            const userRepository = connection.getRepository(User);
-            const users = await userRepository.find();
+    it("should return 400 when firstName is missing", async () => {
+        //arrange
+        const user = {
+            password: "12345678",
+            lastName: "b",
+            email: "b",
+        };
 
-            expect(users).toHaveLength(1);
+        //act // assert
+        const response = await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect(400);
 
-            //check user is the same
+        const repo = await connection.getRepository(User);
+        const users = await repo.find();
 
-            expect(users[0].firstName).toBe(user.firstName);
-            expect(users[0].lastName).toBe(user.lastName);
-            expect(users[0].email).toBe(user.email);
-        });
+        expect(response.body.errors[0].msg).toBe("firstName is missing");
+        expect(users.length).toBe(0);
+    });
+    it("should return 400 when lastName is missing", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            email: "b",
+            password: "12345678",
+        };
 
-        it("should create the id of the user", async () => {
-            //arrange
-            const user = {
-                firstName: "a",
-                lastName: "b",
-                email: "c",
-                password: "e",
-            };
+        //act // assert
+        const response = await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect(400);
 
-            //act
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
+        const repo = await connection.getRepository(User);
+        const users = await repo.find();
 
-            const userRepository = connection.getRepository(User);
-            const users = await userRepository.find();
+        expect(response.body.errors[0].msg).toBe("lastName is missing");
+        expect(users.length).toBe(0);
+    });
 
-            //assert
-            expect(users).toHaveLength(1);
+    it("should return 400 if password is missing", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            lastName: "c",
+            email: "b",
+        };
 
-            //check user is the same
+        //act // assert
+        const response = await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect(400);
 
-            expect(users[0].id).toBeDefined();
-        });
+        const repo = connection.getRepository(User);
+        const users = await repo.find();
 
-        it("should assign user a customer role", async () => {
-            //arrange
-            const user = {
-                firstName: "a",
-                lastName: "b",
-                email: "c",
-                password: "e",
-            };
+        expect(response.body.errors[0].msg).toBe("password is missing");
+        expect(users.length).toBe(0);
+    });
 
-            //act
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
+    it("should trim the email id if space is there", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            lastName: "c",
+            email: " b@gmail.com ",
+            password: "12345678",
+        };
 
-            const userRepository = connection.getRepository(User);
-            const users = await userRepository.find();
+        //act
+        await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect(201);
+        // assert
+        const repo = await connection.getRepository(User);
+        const users = await repo.find();
 
-            //assert
-            expect(users).toHaveLength(1);
+        expect(users[0].email).toBe(user.email.trim());
+    });
 
-            //check user is the same
-            expect(users[0].role).toBe(ROLES.CUSTOMER);
-        });
+    it("Should return 400 status code if password length is less than 8 characters.", async () => {
+        //arrange
+        const user = {
+            firstName: "a",
+            lastName: "c",
+            email: " b@gmail.com ",
+            password: "b",
+        };
 
-        it("should store hashed password in the database", async () => {
-            //arrange
-            const user = {
-                firstName: "a",
-                lastName: "b",
-                email: "c",
-                password: "e",
-            };
+        //act
+        const response = await api
+            .post(BASE_URL + "/register")
+            .send(user)
+            .expect(400);
+        // assert
+        const repo = await connection.getRepository(User);
+        const users = await repo.find();
 
-            //act
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
-
-            const userRepository = connection.getRepository(User);
-            const users = await userRepository.find();
-
-            //assert
-            expect(users).toHaveLength(1);
-
-            //check user is the same
-
-            expect(users[0].hashedPassword).toBeDefined();
-
-            expect(
-                await bcrypt.compare(user.password, users[0].hashedPassword),
-            ).toBeTruthy();
-        });
-
-        it("should return 400 status code , if email exists", async () => {
-            //arrange
-            const user = {
-                firstName: "a",
-                lastName: "b",
-                email: "c",
-                password: "p",
-            };
-
-            await connection.getRepository(User).save(user);
-
-            const repo = connection.getRepository(User);
-
-            const usersBefore = await repo.find();
-
-            //act // assert
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(400);
-
-            const usersAfter = await repo.find();
-
-            expect(usersBefore.length).toBe(usersAfter.length);
-        });
-        it("should return 400 status code , if email not in request", async () => {
-            //arrange
-            const user = {
-                firstName: "a",
-                lastName: "b",
-                password: "p",
-            };
-
-            //act // assert
-            const response = await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(400);
-
-            const repo = connection.getRepository(User);
-            const users = await repo.find();
-
-            expect(users.length).toBe(0);
-            expect(response.body.errors[0].msg).toBe("email is missing");
-        });
+        expect(response.body.errors[0].msg).toBe(
+            "Password must be at least 8 characters long",
+        );
+        expect(users.length).toBe(0);
     });
 });
