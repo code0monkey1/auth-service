@@ -24,7 +24,8 @@ app.use(
         res.status(statusCode).json({
             errors: [
                 {
-                    type: error.message,
+                    type: error.name,
+                    message: error.message,
                     path: "",
                     location: "",
                 },

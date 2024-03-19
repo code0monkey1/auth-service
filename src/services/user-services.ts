@@ -14,7 +14,7 @@ export class UserService {
         });
 
         if (user) {
-            const error = createHttpError(400, "User Exists");
+            const error = createHttpError(400, "EmailId already exists");
             throw error;
         }
 

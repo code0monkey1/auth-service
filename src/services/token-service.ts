@@ -11,8 +11,6 @@ import { Repository } from "typeorm";
 export class TokenService {
     constructor(private refreshTokenRepository: Repository<RefreshToken>) {}
     generateAccessToken = (jwtPayload: JwtPayload) => {
-        //crate jwt
-        //get the private key
         let privateKey: Buffer;
 
         try {

@@ -3,8 +3,6 @@ import { RegisterRequest } from "../types";
 import { UserService } from "../services/user-services";
 import { Logger } from "winston";
 import { validationResult } from "express-validator";
-// import { AppDataSource } from "../config/data-source";
-// import { RefreshToken } from "../entity/RefreshToken";
 import { TokenService } from "../services/token-service";
 import { JwtPayload } from "jsonwebtoken";
 
@@ -49,7 +47,6 @@ export class AuthController {
             const accessToken =
                 this.tokenService.generateAccessToken(jwtPayload);
 
-            // persist the refresh token
             const newRefreshToken =
                 await this.tokenService.persistRefreshToken(user);
 
