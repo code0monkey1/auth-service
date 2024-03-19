@@ -3,7 +3,11 @@ import { RegisterRequest } from "../types";
 import { UserService } from "../services/user-services";
 import { Logger } from "winston";
 import { validationResult } from "express-validator";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import fs from "fs";
+import path from "path";
+import createHttpError from "http-errors";
+import { Config } from "../config";
 export class AuthController {
     constructor(
         private readonly userService: UserService,
@@ -37,8 +41,42 @@ export class AuthController {
             });
 
             //crate jwt
-            const accessToken = jwt.sign({ id: user.id }, "secret");
-            const refreshToken = jwt.sign({ id: user.id }, "secret");
+            //get the private key
+            let privateKey: Buffer;
+
+            try {
+                privateKey = fs.readFileSync(
+                    path.join(__dirname, "../../certs/private.pem"),
+                );
+            } catch (e) {
+                const error = createHttpError(
+                    500,
+                    "Error while reading private key",
+                );
+                next(error);
+                return;
+            }
+
+            const jwtPayload: JwtPayload = {
+                sub: String(user.id),
+                role: user.role,
+            };
+
+            const accessToken = jwt.sign(jwtPayload, privateKey, {
+                algorithm: "RS256",
+                expiresIn: "1h",
+                issuer: "auth-service",
+            });
+
+            const refreshToken = jwt.sign(
+                jwtPayload,
+                Config.REFRESH_TOKEN_JWT_SECRET!,
+                {
+                    algorithm: "HS256",
+                    expiresIn: "1y",
+                    issuer: "auth-service",
+                },
+            );
 
             res.cookie("accessToken", accessToken, {
                 domain: "localhost",
