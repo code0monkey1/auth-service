@@ -100,7 +100,7 @@ export class AuthController {
                 ),
             );
 
-            const userOrError = await this.userService.findByEmail(
+            const userOrError = await this.userService.findByEmailAndPassword(
                 email,
                 password,
             );

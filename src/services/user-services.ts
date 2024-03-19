@@ -47,15 +47,17 @@ export class UserService {
         }
     };
 
-    findByEmail = async (email: string, password: string) => {
+    findByEmailAndPassword = async (email: string, password: string) => {
         const user = await this.userRepository.findOne({
             where: { email },
         });
 
-        const isValidUser = await this.encryptionService.verify(
-            password,
-            user ? user.hashedPassword : "invalid_password",
-        );
+        const isValidUser =
+            user &&
+            (await this.encryptionService.verify(
+                password,
+                user.hashedPassword,
+            ));
 
         if (!(isValidUser && user)) {
             const error = createHttpError(
