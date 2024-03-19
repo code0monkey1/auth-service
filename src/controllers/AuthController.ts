@@ -3,8 +3,8 @@ import { RegisterRequest } from "../types";
 import { UserService } from "../services/user-services";
 import { Logger } from "winston";
 import { validationResult } from "express-validator";
-import { AppDataSource } from "../config/data-source";
-import { RefreshToken } from "../entity/RefreshToken";
+// import { AppDataSource } from "../config/data-source";
+// import { RefreshToken } from "../entity/RefreshToken";
 import { TokenService } from "../services/token-service";
 import { JwtPayload } from "jsonwebtoken";
 
@@ -49,22 +49,14 @@ export class AuthController {
             const accessToken =
                 this.tokenService.generateAccessToken(jwtPayload);
 
-            const MS_IN_YEARS = 60 * 60 * 24 * 365;
-
-            const refreshTokenRepository =
-                AppDataSource.getRepository(RefreshToken);
-
-            const newRefreshToken = await refreshTokenRepository.save({
-                user: user.id,
-                expiresAt: new Date(Date.now() + MS_IN_YEARS),
-            });
+            // persist the refresh token
+            const newRefreshToken =
+                await this.tokenService.persistRefreshToken(user);
 
             const refreshToken = this.tokenService.generateRefreshToken({
                 ...jwtPayload,
                 id: newRefreshToken.id,
             });
-
-            // persist the refresh token
 
             res.cookie("accessToken", accessToken, {
                 domain: "localhost",

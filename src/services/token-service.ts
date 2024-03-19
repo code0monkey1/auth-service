@@ -4,8 +4,12 @@ import createHttpError from "http-errors";
 import path from "path";
 import fs from "fs";
 import { Config } from "../config";
+import { RefreshToken } from "../entity/RefreshToken";
+import { User } from "../entity/User";
+import { Repository } from "typeorm";
 
 export class TokenService {
+    constructor(private refreshTokenRepository: Repository<RefreshToken>) {}
     generateAccessToken = (jwtPayload: JwtPayload) => {
         //crate jwt
         //get the private key
@@ -45,5 +49,16 @@ export class TokenService {
         );
 
         return refreshToken;
+    };
+
+    persistRefreshToken = async (user: User & { id: string }) => {
+        const MS_IN_YEARS = 60 * 60 * 24 * 365;
+
+        const newRefreshToken = await this.refreshTokenRepository.save({
+            user: user.id,
+            expiresAt: new Date(Date.now() + MS_IN_YEARS),
+        });
+
+        return newRefreshToken;
     };
 }
