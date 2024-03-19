@@ -6,6 +6,7 @@ import { User } from "../../src/entity/User";
 import { ROLES } from "../../src/constants";
 import bcrypt from "bcrypt";
 import { isJwt } from "../utils";
+import { RefreshToken } from "../../src/entity/RefreshToken";
 
 const api = supertest(app);
 const BASE_URL = "/auth";
@@ -27,6 +28,9 @@ describe("POST", () => {
     const clearDatabase = async () => {
         const userRepository = connection.getRepository(User);
         await userRepository.delete({});
+
+        // const refreshTokenRepository = connection.getRepository(RefreshToken);
+        // await refreshTokenRepository.delete({});
     };
 
     describe("when user data is valid", () => {
@@ -200,6 +204,34 @@ describe("POST", () => {
 
             expect(isJwt(accessToken)).toBeTruthy();
             expect(isJwt(refreshToken)).toBeTruthy();
+        });
+
+        it("should store the refreshToken in the database", async () => {
+            //arrange
+            const user = {
+                firstName: "a",
+                lastName: "b",
+                password: "12345678",
+                email: "vodsfonn@gmail.com",
+            };
+            //act
+            const response = await api
+                .post(BASE_URL + "/register")
+                .send(user)
+                .expect(201);
+
+            const refreshTokenRepo = connection.getRepository(RefreshToken);
+
+            //assert
+
+            const tokens = await refreshTokenRepo
+                .createQueryBuilder("refreshToken")
+                .where("refreshToken.userId = :userId", {
+                    userId: response.body.id,
+                })
+                .getMany();
+
+            expect(tokens).toHaveLength(1);
         });
     });
 
