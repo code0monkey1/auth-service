@@ -1,12 +1,15 @@
 import { Repository } from "typeorm";
-import bcrypt from "bcrypt";
 import { User } from "../entity/User";
 import { UserData } from "../types";
 import createHttpError from "http-errors";
 import { ROLES } from "../constants";
+import { EncryptionService } from "./encryption-service";
 
 export class UserService {
-    constructor(private readonly userRepository: Repository<User>) {}
+    constructor(
+        private readonly userRepository: Repository<User>,
+        private readonly encryptionService: EncryptionService,
+    ) {}
 
     create = async (userData: UserData) => {
         const user = await this.userRepository.findOne({
@@ -20,8 +23,10 @@ export class UserService {
 
         const { firstName, lastName, email } = userData;
 
-        //hash the password
-        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        const hashedPassword = await this.encryptionService.getEncryptedHash(
+            userData.password,
+        );
+
         try {
             const user = await this.userRepository.save({
                 firstName,
@@ -40,5 +45,26 @@ export class UserService {
 
             throw error;
         }
+    };
+
+    findByEmail = async (email: string, password: string) => {
+        const user = await this.userRepository.findOne({
+            where: { email },
+        });
+
+        const isValidUser = await this.encryptionService.verify(
+            password,
+            user ? user.hashedPassword : "invalid_password",
+        );
+
+        if (!(isValidUser && user)) {
+            const error = createHttpError(
+                400,
+                "Email or Password does not match",
+            );
+            throw error;
+        }
+
+        return user as User & { id: string };
     };
 }

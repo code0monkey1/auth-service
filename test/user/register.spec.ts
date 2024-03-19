@@ -9,11 +9,11 @@ import { isJwt } from "../utils";
 import { RefreshToken } from "../../src/entity/RefreshToken";
 
 const api = supertest(app);
-const BASE_URL = "/auth";
+const BASE_URL = "/auth/register";
 
 let connection: DataSource;
 
-describe("POST", () => {
+describe("POST /auth/register", () => {
     beforeAll(async () => {
         connection = await AppDataSource.initialize();
     });
@@ -28,9 +28,6 @@ describe("POST", () => {
     const clearDatabase = async () => {
         const userRepository = connection.getRepository(User);
         await userRepository.delete({});
-
-        // const refreshTokenRepository = connection.getRepository(RefreshToken);
-        // await refreshTokenRepository.delete({});
     };
 
     describe("when user data is valid", () => {
@@ -38,39 +35,30 @@ describe("POST", () => {
             const user = {
                 firstName: "a",
                 lastName: "b",
-                email: "c",
+                email: "c@gmail.com",
                 password: "12345678",
             };
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(201);
+            await api.post(BASE_URL).send(user).expect(201);
         });
 
         it("should return json format data", async () => {
             const user = {
                 firstName: "a",
                 lastName: "b",
-                email: "c",
+                email: "c@gmail.com",
                 password: "12345678",
             };
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
+            await api.post(BASE_URL).send(user).expect("Content-Type", /json/);
         });
 
         it("should return create a new user", async () => {
             const user = {
                 firstName: "a",
                 lastName: "b",
-                email: "c",
+                email: "c@gmail.com",
                 password: "12345678",
             };
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
+            await api.post(BASE_URL).send(user).expect("Content-Type", /json/);
 
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -89,15 +77,12 @@ describe("POST", () => {
             const user = {
                 firstName: "a",
                 lastName: "b",
-                email: "c",
+                email: "c@gmail.com",
                 password: "12345678",
             };
 
             //act
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
+            await api.post(BASE_URL).send(user).expect("Content-Type", /json/);
 
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -115,15 +100,12 @@ describe("POST", () => {
             const user = {
                 firstName: "a",
                 lastName: "b",
-                email: "c",
+                email: "c@gmail.com",
                 password: "12345678",
             };
 
             //act
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
+            await api.post(BASE_URL).send(user).expect("Content-Type", /json/);
 
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -140,15 +122,12 @@ describe("POST", () => {
             const user = {
                 firstName: "a",
                 lastName: "b",
-                email: "c",
+                email: "c@gmail.com",
                 password: "12345678",
             };
 
             //act
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect("Content-Type", /json/);
+            await api.post(BASE_URL).send(user).expect("Content-Type", /json/);
 
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -174,10 +153,7 @@ describe("POST", () => {
             };
 
             //act
-            const response = await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(201);
+            const response = await api.post(BASE_URL).send(user).expect(201);
 
             interface Headers {
                 ["set-cookie"]: string[];
@@ -215,10 +191,7 @@ describe("POST", () => {
                 email: "vodsfonn@gmail.com",
             };
             //act
-            const response = await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(201);
+            const response = await api.post(BASE_URL).send(user).expect(201);
 
             const refreshTokenRepo = connection.getRepository(RefreshToken);
 
@@ -241,7 +214,7 @@ describe("POST", () => {
             const user = {
                 firstName: "a",
                 lastName: "b",
-                email: "c",
+                email: "c@gmail.com",
                 password: "12345678",
             };
 
@@ -252,10 +225,7 @@ describe("POST", () => {
             const usersBefore = await repo.find();
 
             //act // assert
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(400);
+            await api.post(BASE_URL).send(user).expect(400);
 
             const usersAfter = await repo.find();
 
@@ -270,10 +240,7 @@ describe("POST", () => {
             };
 
             //act // assert
-            const response = await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(400);
+            const response = await api.post(BASE_URL).send(user).expect(400);
 
             const repo = await connection.getRepository(User);
             const users = await repo.find();
@@ -287,14 +254,11 @@ describe("POST", () => {
             const user = {
                 password: "12345678",
                 lastName: "b",
-                email: "b",
+                email: "b@gmail.com",
             };
 
             //act // assert
-            const response = await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(400);
+            const response = await api.post(BASE_URL).send(user).expect(400);
 
             const repo = await connection.getRepository(User);
             const users = await repo.find();
@@ -306,15 +270,12 @@ describe("POST", () => {
             //arrange
             const user = {
                 firstName: "a",
-                email: "b",
+                email: "b@gmail.com",
                 password: "12345678",
             };
 
             //act // assert
-            const response = await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(400);
+            const response = await api.post(BASE_URL).send(user).expect(400);
 
             const repo = await connection.getRepository(User);
             const users = await repo.find();
@@ -328,14 +289,11 @@ describe("POST", () => {
             const user = {
                 firstName: "a",
                 lastName: "c",
-                email: "b",
+                email: "b@gmail.com",
             };
 
             //act // assert
-            const response = await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(400);
+            const response = await api.post(BASE_URL).send(user).expect(400);
 
             const repo = connection.getRepository(User);
             const users = await repo.find();
@@ -354,10 +312,7 @@ describe("POST", () => {
             };
 
             //act
-            await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(201);
+            await api.post(BASE_URL).send(user).expect(201);
             // assert
             const repo = await connection.getRepository(User);
             const users = await repo.find();
@@ -375,10 +330,7 @@ describe("POST", () => {
             };
 
             //act
-            const response = await api
-                .post(BASE_URL + "/register")
-                .send(user)
-                .expect(400);
+            const response = await api.post(BASE_URL).send(user).expect(400);
             // assert
             const repo = await connection.getRepository(User);
             const users = await repo.find();

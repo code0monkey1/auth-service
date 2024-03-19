@@ -7,16 +7,22 @@ import logger from "../config/logger";
 import registerValidator from "../validators/register-validator";
 import { TokenService } from "../services/token-service";
 import { RefreshToken } from "../entity/RefreshToken";
+import loginValidator from "../validators/login-validator";
+import { EncryptionService } from "../services/encryption-service";
 
 const route = Router();
 
 const userRepository = AppDataSource.getRepository(User);
-const userService = new UserService(userRepository);
+const encryptionService = new EncryptionService();
+const userService = new UserService(userRepository, encryptionService);
 const refreshTokenRepository = AppDataSource.getRepository(RefreshToken);
 const tokenService = new TokenService(refreshTokenRepository);
 const authController = new AuthController(userService, logger, tokenService);
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 route.post("/register", registerValidator, authController.register);
+
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+route.post("/login", loginValidator, authController.login);
 
 export default route;
