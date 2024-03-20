@@ -73,4 +73,32 @@ describe("GET /auth/self", () => {
 
         expect(response.body.id).toBe(user.id);
     });
+
+    it("should not return the password field of the user", async () => {
+        const userData = {
+            firstName: "a",
+            lastName: "b",
+            email: "femail@gmail.com",
+            password: "********",
+        };
+
+        const userRepository = connection.getRepository(User);
+        const user = await userRepository.save({
+            ...userData,
+            role: ROLES.CUSTOMER,
+        });
+
+        const jwtPayload = {
+            userId: String(user.id),
+            role: user.role,
+        };
+
+        const accessToken = jwks_server.token(jwtPayload);
+
+        const response = await api
+            .get("/auth/self")
+            .set("Cookie", [`accessToken=${accessToken};`]);
+
+        expect(response.body.hashedPassword).not.toBeDefined();
+    });
 });

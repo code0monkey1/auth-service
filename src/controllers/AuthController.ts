@@ -163,7 +163,7 @@ export class AuthController {
                 return;
             }
 
-            res.json(user);
+            res.json({ ...user, hashedPassword: undefined });
         } catch (e) {
             next(e);
         }
