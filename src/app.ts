@@ -22,7 +22,7 @@ app.use(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (error: HttpError, req: Request, res: Response, _next: NextFunction) => {
         logger.error(error.message);
-        const statusCode = error.statusCode || 500;
+        const statusCode = error.statusCode || error.status || 500;
         res.status(statusCode).json({
             errors: [
                 {

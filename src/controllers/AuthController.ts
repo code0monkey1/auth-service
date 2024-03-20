@@ -151,9 +151,9 @@ export class AuthController {
 
     self = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const authRequest = req as AuthRequest;
+            const authRequest = req;
 
-            const userId = Number(authRequest.auth.userId);
+            const userId = Number(authRequest?.auth?.userId);
 
             const user = await this.userService.findById(userId);
 
@@ -167,11 +167,5 @@ export class AuthController {
         } catch (e) {
             next(e);
         }
-    };
-}
-
-interface AuthRequest extends Request {
-    auth: {
-        userId: string;
     };
 }
