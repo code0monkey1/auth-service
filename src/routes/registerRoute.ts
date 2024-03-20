@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { Router } from "express";
 import { AuthController } from "../controllers/AuthController";
 import { UserService } from "../services/user-services";
@@ -9,6 +10,7 @@ import { TokenService } from "../services/token-service";
 import { RefreshToken } from "../entity/RefreshToken";
 import loginValidator from "../validators/login-validator";
 import { EncryptionService } from "../services/encryption-service";
+import authenticate from "../middleware/authenticate";
 
 const route = Router();
 
@@ -19,10 +21,10 @@ const refreshTokenRepository = AppDataSource.getRepository(RefreshToken);
 const tokenService = new TokenService(refreshTokenRepository);
 const authController = new AuthController(userService, logger, tokenService);
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 route.post("/register", registerValidator, authController.register);
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 route.post("/login", loginValidator, authController.login);
+
+route.get("/self", authenticate, authController.self);
 
 export default route;

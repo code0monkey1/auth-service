@@ -59,7 +59,7 @@ export class UserService {
                 user.hashedPassword,
             ));
 
-        if (!(isValidUser && user)) {
+        if (!isValidUser) {
             const error = createHttpError(
                 400,
                 "Email or Password does not match",
@@ -68,5 +68,10 @@ export class UserService {
         }
 
         return user as User & { id: string };
+    };
+
+    findById = async (id: number) => {
+        const user = await this.userRepository.findOne({ where: { id } });
+        return user;
     };
 }

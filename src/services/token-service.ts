@@ -11,19 +11,7 @@ import { Repository } from "typeorm";
 export class TokenService {
     constructor(private refreshTokenRepository: Repository<RefreshToken>) {}
     generateAccessToken = (jwtPayload: JwtPayload) => {
-        let privateKey: Buffer;
-
-        try {
-            privateKey = fs.readFileSync(
-                path.join(__dirname, "../../certs/private.pem"),
-            );
-        } catch (e) {
-            const error = createHttpError(
-                500,
-                "Error while reading private key",
-            );
-            throw error;
-        }
+        const privateKey: Buffer = this.getPrivateKey();
 
         const accessToken = jwt.sign(jwtPayload, privateKey, {
             algorithm: "RS256",
@@ -58,5 +46,22 @@ export class TokenService {
         });
 
         return newRefreshToken;
+    };
+
+    private getPrivateKey = () => {
+        let privateKey: Buffer;
+
+        try {
+            privateKey = fs.readFileSync(
+                path.join(__dirname, "../../certs/private.pem"),
+            );
+        } catch (e) {
+            const error = createHttpError(
+                500,
+                "Error while reading private key",
+            );
+            throw error;
+        }
+        return privateKey;
     };
 }

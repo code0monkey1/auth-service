@@ -5,7 +5,9 @@ import { HttpError } from "http-errors";
 const app = express();
 import registerRoute from "./routes/registerRoute";
 import "express-async-errors";
+import cookieParser from "cookie-parser";
 
+app.use(cookieParser());
 app.use(express.json());
 
 app.get("/data", (req, res) => {

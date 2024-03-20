@@ -1,10 +1,11 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { RegisterRequest } from "../types";
 import { UserService } from "../services/user-services";
 import { Logger } from "winston";
 import { validationResult } from "express-validator";
 import { TokenService } from "../services/token-service";
 import { JwtPayload } from "jsonwebtoken";
+import createHttpError from "http-errors";
 
 export class AuthController {
     constructor(
@@ -44,7 +45,7 @@ export class AuthController {
             });
 
             const jwtPayload: JwtPayload = {
-                sub: String(user.id),
+                userId: String(user.id),
                 role: user.role,
             };
 
@@ -111,7 +112,7 @@ export class AuthController {
             }
 
             const jwtPayload: JwtPayload = {
-                sub: String(userOrError.id),
+                userId: String(userOrError.id),
                 role: userOrError.role,
             };
 
@@ -146,5 +147,31 @@ export class AuthController {
         } catch (e) {
             next(e);
         }
+    };
+
+    self = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const authRequest = req as AuthRequest;
+
+            const userId = Number(authRequest.auth.userId);
+
+            const user = await this.userService.findById(userId);
+
+            if (!user) {
+                const error = createHttpError(404, "User not found");
+                next(error);
+                return;
+            }
+
+            res.json(user);
+        } catch (e) {
+            next(e);
+        }
+    };
+}
+
+interface AuthRequest extends Request {
+    auth: {
+        userId: string;
     };
 }
