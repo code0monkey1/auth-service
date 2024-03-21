@@ -4,8 +4,9 @@ import { UserData } from "../types";
 import createHttpError from "http-errors";
 import { ROLES } from "../constants";
 import { EncryptionService } from "./encryption-service";
+import { UserServiceInterface } from "../application/interfaces/services/user/user-service-interface";
 
-export class UserService {
+export class UserService implements UserServiceInterface<UserData, User> {
     constructor(
         private readonly userRepository: Repository<User>,
         private readonly encryptionService: EncryptionService,

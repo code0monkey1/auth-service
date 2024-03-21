@@ -2,7 +2,8 @@ import { DataSource } from "typeorm";
 import { AppDataSource } from "../../src/config/data-source";
 import { User } from "../../src/entity/User";
 import supertest from "supertest";
-import app from "../../src/app";
+import setupApp from "../../src/config/app";
+const app = setupApp();
 const api = supertest(app);
 import createMockJwks, { JWKSMock } from "mock-jwks";
 import { ROLES } from "../../src/constants";
@@ -37,9 +38,9 @@ describe("GET /auth/self", () => {
         const userRepository = connection.getRepository(User);
         await userRepository.delete({});
     };
-    it("should return status code 500 , if sent without auth", async () => {
+    it("should return status code 401 , if sent without auth", async () => {
         //act
-        await api.get(BASE_URL).expect(500);
+        await api.get(BASE_URL).expect(401);
     });
 
     it("should return response in json format", async () => {
