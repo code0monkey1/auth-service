@@ -1,6 +1,5 @@
 import supertest from "supertest";
 import { DataSource } from "typeorm";
-// import app from "../../src/app";
 import { AppDataSource } from "../../src/config/data-source";
 import { User } from "../../src/entity/User";
 import { EncryptionService } from "../../src/services/encryption-service";

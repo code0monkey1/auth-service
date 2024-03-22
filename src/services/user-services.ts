@@ -4,7 +4,7 @@ import { UserData } from "../types";
 import createHttpError from "http-errors";
 import { ROLES } from "../constants";
 import { EncryptionService } from "./encryption-service";
-import { UserServiceInterface } from "../application/interfaces/services/user/user-service-interface";
+import { UserServiceInterface } from "../application/interfaces/use-cases/services/user/user-service-interface";
 
 export class UserService implements UserServiceInterface<UserData, User> {
     constructor(

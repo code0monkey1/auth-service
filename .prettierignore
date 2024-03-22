@@ -2,5 +2,3 @@ coverage
 package.json
 package-lock.json
 tsconfig.json
-public
-scripts

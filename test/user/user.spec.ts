@@ -12,7 +12,7 @@ describe("GET /auth/self", () => {
     let connection: DataSource;
     const BASE_URL = "/auth/self";
     let jwks_server: JWKSMock;
-    const JWKS_URI = "http://localhost:5555";
+    const JWKS_URI = "http://localhost:3000";
 
     beforeAll(async () => {
         connection = await AppDataSource.initialize();

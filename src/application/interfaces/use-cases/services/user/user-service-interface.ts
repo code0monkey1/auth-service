@@ -3,6 +3,6 @@ export interface UserServiceInterface<Req, Res> {
     findByEmailAndPassword(
         email: string,
         password: string,
-    ): Promise<Error> | Promise<Res>;
+    ): Promise<Res | Error>;
     findById(id: number): Promise<Res | null>;
 }

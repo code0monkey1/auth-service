@@ -11,6 +11,7 @@ import { RefreshToken } from "../entity/RefreshToken";
 import loginValidator from "../validators/login-validator";
 import { EncryptionService } from "../services/encryption-service";
 import authenticate from "../middleware/authenticate";
+import validateRefreshToken from "../middleware/validateRefreshToken";
 
 const route = Router();
 
@@ -26,5 +27,7 @@ route.post("/register", registerValidator, authController.register);
 route.post("/login", loginValidator, authController.login);
 
 route.get("/self", authenticate, authController.self);
+
+route.post("/refresh", validateRefreshToken, authController.refresh);
 
 export default route;
