@@ -10,8 +10,9 @@ import { TokenService } from "../services/token-service";
 import { RefreshToken } from "../entity/RefreshToken";
 import loginValidator from "../validators/login-validator";
 import { EncryptionService } from "../services/encryption-service";
-import authenticate from "../middleware/authenticate";
+
 import validateRefreshToken from "../middleware/validateRefreshToken";
+import authenticate from "../middleware/authenticate";
 
 const route = Router();
 
@@ -20,6 +21,7 @@ const encryptionService = new EncryptionService();
 const userService = new UserService(userRepository, encryptionService);
 const refreshTokenRepository = AppDataSource.getRepository(RefreshToken);
 const tokenService = new TokenService(refreshTokenRepository);
+
 const authController = new AuthController(userService, logger, tokenService);
 
 route.post("/register", registerValidator, authController.register);

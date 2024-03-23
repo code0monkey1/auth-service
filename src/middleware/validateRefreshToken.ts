@@ -16,8 +16,6 @@ export default expressjwt({
     },
     async isRevoked(req: Request, token) {
         try {
-            //get refresh token
-
             // see if the refreshToken with given Id is present
             const refreshTokenRepo = AppDataSource.getRepository(RefreshToken);
             const refreshToken = await refreshTokenRepo.findOne({
@@ -30,6 +28,7 @@ export default expressjwt({
                     },
                 },
             });
+
             // if refreshToken is found in the db  , send false , else send true
             return refreshToken === null;
         } catch (e) {

@@ -7,6 +7,7 @@ import { Config } from "../config";
 import { RefreshToken } from "../entity/RefreshToken";
 import { User } from "../entity/User";
 import { Repository } from "typeorm";
+import { Response } from "express";
 
 export class TokenService {
     constructor(private refreshTokenRepository: Repository<RefreshToken>) {}
@@ -37,16 +38,48 @@ export class TokenService {
         return refreshToken;
     };
 
-    deleteRefreshToken = async (id: string) => {
+    setAccessToken = (res: Response, jwtPayload: JwtPayload) => {
+        const accessToken = this.generateAccessToken(jwtPayload);
+
+        res.cookie("accessToken", accessToken, {
+            domain: "localhost",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60, // 1 hour
+            httpOnly: true, // this ensures that the cookie can be only taken by server
+        });
+    };
+
+    setRefreshToken = async (
+        res: Response,
+        jwtPayload: JwtPayload,
+        user: User,
+    ) => {
+        const newRefreshToken = await this.persistRefreshToken(user);
+
+        const refreshToken = this.generateRefreshToken({
+            ...jwtPayload,
+            id: newRefreshToken.id,
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            domain: "localhost",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
+            httpOnly: true, // this ensures that the cookie can be only taken by server
+        });
+    };
+
+    deleteRefreshToken = async (id: number) => {
         await this.refreshTokenRepository.delete(id);
     };
 
-    persistRefreshToken = async (user: User) => {
-        const MS_IN_YEARS = 60 * 60 * 24 * 365;
+    persistRefreshToken = async (user: User, years = 1) => {
+        // default set to one year
+        const YEARS = 60 * 60 * 24 * 365 * years;
 
         const newRefreshToken = await this.refreshTokenRepository.save({
             user: user,
-            expiresAt: new Date(Date.now() + MS_IN_YEARS),
+            expiresAt: new Date(Date.now() + YEARS),
         });
 
         return newRefreshToken;
