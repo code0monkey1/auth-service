@@ -2,7 +2,8 @@ import { DataSource } from "typeorm";
 import { AppDataSource } from "../../src/config/data-source";
 import { User } from "../../src/entity/User";
 import supertest from "supertest";
-import app from "../../src/app";
+import setupApp from "../../src/config/app";
+const app = setupApp();
 const api = supertest(app);
 import createMockJwks, { JWKSMock } from "mock-jwks";
 import { ROLES } from "../../src/constants";
@@ -11,7 +12,7 @@ describe("GET /auth/self", () => {
     let connection: DataSource;
     const BASE_URL = "/auth/self";
     let jwks_server: JWKSMock;
-    const JWKS_URI = "http://localhost:5555";
+    const JWKS_URI = "http://localhost:3000";
 
     beforeAll(async () => {
         connection = await AppDataSource.initialize();
@@ -37,7 +38,8 @@ describe("GET /auth/self", () => {
         const userRepository = connection.getRepository(User);
         await userRepository.delete({});
     };
-    it("should return status code 401, if sent without auth", async () => {
+
+    it("should return status code 401 , if sent without auth", async () => {
         //act
         await api.get(BASE_URL).expect(401);
     });

@@ -1,5 +1,4 @@
 import supertest from "supertest";
-import app from "../../src/app";
 import { DataSource } from "typeorm";
 import { AppDataSource } from "../../src/config/data-source";
 import { User } from "../../src/entity/User";
@@ -7,7 +6,8 @@ import { ROLES } from "../../src/constants";
 import bcrypt from "bcrypt";
 import { isJwt } from "../utils";
 import { RefreshToken } from "../../src/entity/RefreshToken";
-
+import setupApp from "../../src/config/app";
+const app = setupApp();
 const api = supertest(app);
 const BASE_URL = "/auth/register";
 

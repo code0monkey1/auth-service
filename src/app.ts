@@ -3,9 +3,10 @@ import express, { NextFunction, Request, Response } from "express";
 import logger from "./config/logger";
 import { HttpError } from "http-errors";
 const app = express();
-import registerRoute from "./routes/registerRoute";
+
 import "express-async-errors";
 import cookieParser from "cookie-parser";
+import registerRoute from "./routes/register-route";
 
 app.use(cookieParser());
 app.use(express.json());

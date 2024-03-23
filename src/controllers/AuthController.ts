@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { NextFunction, Request, Response } from "express";
 import { RegisterRequest } from "../types";
 import { UserService } from "../services/user-services";
@@ -6,7 +7,13 @@ import { validationResult } from "express-validator";
 import { TokenService } from "../services/token-service";
 import { JwtPayload } from "jsonwebtoken";
 import createHttpError from "http-errors";
-
+interface AuthRequest extends Request {
+    auth: {
+        userId: string;
+        role: string;
+        id: string;
+    };
+}
 export class AuthController {
     constructor(
         private readonly userService: UserService,
@@ -164,6 +171,68 @@ export class AuthController {
             }
 
             res.json({ ...user, hashedPassword: undefined });
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    refresh = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const authRequest = req as AuthRequest;
+
+            //delete the previous refreshToken
+            await this.tokenService.deleteRefreshToken(
+                Number(authRequest.auth.id),
+            );
+
+            const jwtPayload: JwtPayload = {
+                userId: String(authRequest.auth.userId),
+                role: authRequest.auth.role,
+            };
+
+            const accessToken =
+                this.tokenService.generateAccessToken(jwtPayload);
+
+            res.cookie("accessToken", accessToken, {
+                domain: "localhost",
+                sameSite: "strict",
+                maxAge: 1000 * 60 * 60, // 1 hour
+                httpOnly: true, // this ensures that the cookie can be only taken by server
+            });
+
+            const user = await this.userService.findById(
+                Number(authRequest.auth.userId),
+            );
+
+            if (!user) {
+                return next(
+                    createHttpError(400, "cannot find user with token"),
+                );
+            }
+
+            const newRefreshToken =
+                await this.tokenService.persistRefreshToken(user);
+
+            const refreshToken = this.tokenService.generateRefreshToken({
+                ...jwtPayload,
+                id: newRefreshToken.id,
+            });
+
+            res.cookie("accessToken", accessToken, {
+                domain: "localhost",
+                sameSite: "strict",
+                maxAge: 1000 * 60 * 60, // 1 hour
+                httpOnly: true, // this ensures that the cookie can be only taken by server
+            });
+
+            res.cookie("refreshToken", refreshToken, {
+                domain: "localhost",
+                sameSite: "strict",
+                maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
+                httpOnly: true, // this ensures that the cookie can be only taken by server
+            });
+
+            res.json({ id: user.id });
         } catch (e) {
             next(e);
         }
