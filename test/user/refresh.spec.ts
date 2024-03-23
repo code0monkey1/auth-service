@@ -1,7 +1,6 @@
 import supertest from "supertest";
 import { DataSource } from "typeorm";
 import { AppDataSource } from "../../src/config/data-source";
-import { EncryptionService } from "../../src/services/encryption-service";
 import setupApp from "../../src/config/app";
 import { TokenService } from "../../src/services/token-service";
 import { RefreshToken } from "../../src/entity/RefreshToken";
@@ -13,8 +12,6 @@ const api = supertest(app);
 const BASE_URL = "/auth/refresh";
 
 let connection: DataSource;
-let encryptionService: EncryptionService;
-let tokenService: TokenService;
 
 describe("POST /auth/refresh", () => {
     beforeAll(async () => {
