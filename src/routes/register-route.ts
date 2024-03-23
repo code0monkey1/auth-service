@@ -17,6 +17,7 @@ import { RefreshToken } from "../entity/RefreshToken";
 import { User } from "../entity/User";
 import { TokenService } from "../services/token-service";
 import { UserService } from "../services/user-services";
+import parseRefreshToken from "../middleware/parseRefreshToken";
 
 const route = Router();
 
@@ -35,5 +36,7 @@ route.post("/login", loginValidator, authController.login);
 route.get("/self", authenticate, authController.self);
 
 route.post("/refresh", validateRefreshToken, authController.refresh);
+
+route.post("/logout", authenticate, parseRefreshToken, authController.logout);
 
 export default route;

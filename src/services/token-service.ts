@@ -10,7 +10,9 @@ import { Repository } from "typeorm";
 import { Response } from "express";
 
 export class TokenService {
-    constructor(private refreshTokenRepository: Repository<RefreshToken>) {}
+    constructor(
+        private readonly refreshTokenRepository: Repository<RefreshToken>,
+    ) {}
     generateAccessToken = (jwtPayload: JwtPayload) => {
         const privateKey: Buffer = this.getPrivateKey();
 

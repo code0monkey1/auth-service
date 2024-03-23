@@ -158,7 +158,7 @@ export class AuthController {
 
     self = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const authRequest = req;
+            const authRequest = req as AuthRequest;
 
             const userId = Number(authRequest?.auth?.userId);
 
@@ -233,6 +233,27 @@ export class AuthController {
             });
 
             res.json({ id: user.id });
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    logout = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const refreshTokenId = Number((req as AuthRequest).auth.id);
+
+            await this.tokenService.deleteRefreshToken(refreshTokenId);
+
+            this.logger.info("User has been logged out", {
+                id: (req as AuthRequest).auth.userId,
+            });
+
+            //clear cookies
+
+            res.clearCookie("accessToken");
+            res.clearCookie("refreshToken");
+
+            res.end();
         } catch (e) {
             next(e);
         }
