@@ -7,17 +7,17 @@ import { ROLES } from "../../src/constants";
 import { RefreshToken } from "../../src/entity/RefreshToken";
 import { TokenService } from "../../src/services/token-service";
 import createMockJwks, { JWKSMock } from "mock-jwks";
+import { JwtPayload } from "jsonwebtoken";
 
 const app = setupApp();
 const api = supertest(app);
 const BASE_URL = "/auth/logout";
+let connection: DataSource;
+
+let jwks_server: JWKSMock;
+const JWKS_URI = "http://localhost:3000";
 
 describe("POST /auth/logout", () => {
-    let connection: DataSource;
-
-    let jwks_server: JWKSMock;
-    const JWKS_URI = "http://localhost:3000";
-
     beforeAll(async () => {
         connection = await AppDataSource.initialize();
         jwks_server = createMockJwks(JWKS_URI);
@@ -50,12 +50,7 @@ describe("POST /auth/logout", () => {
 
     it("should delete the refresh token entry after logout ", async () => {
         //create user that needs to be in token
-        const userData = {
-            firstName: "a",
-            lastName: "b",
-            email: "femail@gmail.com",
-            password: "********",
-        };
+        const userData = getUserData();
 
         const userRepository = connection.getRepository(User);
 
@@ -71,16 +66,9 @@ describe("POST /auth/logout", () => {
 
         const accessToken = jwks_server.token(jwtPayload);
 
+        const refreshToken = await createRefreshToken(user, jwtPayload);
+
         const refreshTokenRepository = connection.getRepository(RefreshToken);
-
-        const tokenService = new TokenService(refreshTokenRepository);
-
-        const newRefreshToken = await tokenService.persistRefreshToken(user);
-
-        const refreshToken = tokenService.generateRefreshToken({
-            ...jwtPayload,
-            id: newRefreshToken.id,
-        });
 
         const refreshTokensBefore = await refreshTokenRepository.find();
 
@@ -94,7 +82,40 @@ describe("POST /auth/logout", () => {
 
         const refreshTokensAfter = await refreshTokenRepository.find();
 
-        expect(refreshTokensBefore.length).toBe(1);
-        expect(refreshTokensAfter.length).toBe(0);
+        assertRefreshTokenWasDeleted(refreshTokensBefore, refreshTokensAfter);
     });
 });
+
+async function createRefreshToken(user: User, jwtPayload: JwtPayload) {
+    const refreshTokenRepository = connection.getRepository(RefreshToken);
+
+    const tokenService = new TokenService(refreshTokenRepository);
+
+    const newRefreshToken = await tokenService.persistRefreshToken(user);
+
+    const refreshToken = tokenService.generateRefreshToken({
+        ...jwtPayload,
+        id: newRefreshToken.id,
+    });
+
+    return refreshToken;
+}
+
+async function assertRefreshTokenWasDeleted(
+    tokensBefore: any,
+    tokensAfter: any,
+) {
+    expect(tokensBefore.length).toBe(1);
+    expect(tokensAfter.length).toBe(0);
+}
+
+function getUserData() {
+    const userData = {
+        firstName: "a",
+        lastName: "b",
+        email: "femail@gmail.com",
+        password: "********",
+    };
+
+    return userData;
+}

@@ -13,7 +13,7 @@
         "lint:fix": "eslint . --fix",
         "prepare": "husky",
         "start": " NODE_ENV=prod ts-node src/index.ts",
-        "typeorm": "typeorm-ts-node-commonjs"
+        "migration:generate": "typeorm-ts-node-esm"
     },
     "author": "Chiranjeev Thomas",
     "license": "ISC",
