@@ -12,5 +12,6 @@ export default (): Express => {
     setupMiddlewares(app);
     setupRoutes(app);
     setupErrorHandler(app);
+
     return app;
 };
