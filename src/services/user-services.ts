@@ -24,7 +24,7 @@ export class UserService implements UserServiceInterface<UserData, User> {
 
         const { firstName, lastName, email } = userData;
 
-        const hashedPassword = await this.encryptionService.getEncryptedHash(
+        const hashedPassword = await this.encryptionService.generateHash(
             userData.password,
         );
 
@@ -55,7 +55,7 @@ export class UserService implements UserServiceInterface<UserData, User> {
 
         const isValidUser =
             user &&
-            (await this.encryptionService.verify(
+            (await this.encryptionService.compare(
                 password,
                 user.hashedPassword,
             ));

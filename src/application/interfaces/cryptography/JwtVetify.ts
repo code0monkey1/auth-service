@@ -1,3 +1,3 @@
 export interface JwtVerify {
-    verify(jwt: string): Promise<string | null>;
+    compare(jwt: string): Promise<string | null>;
 }

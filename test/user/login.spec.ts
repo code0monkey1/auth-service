@@ -41,7 +41,7 @@ describe("POST /auth/login", () => {
 
             const userRepository = AppDataSource.getRepository(User);
 
-            const hashedPassword = await encryptionService.getEncryptedHash(
+            const hashedPassword = await encryptionService.generateHash(
                 user.password,
             );
 
@@ -66,7 +66,7 @@ describe("POST /auth/login", () => {
 
             const userRepository = AppDataSource.getRepository(User);
 
-            const hashedPassword = await encryptionService.getEncryptedHash(
+            const hashedPassword = await encryptionService.generateHash(
                 user.password,
             );
 
@@ -91,7 +91,7 @@ describe("POST /auth/login", () => {
 
             const userRepository = AppDataSource.getRepository(User);
 
-            const hashedPassword = await encryptionService.getEncryptedHash(
+            const hashedPassword = await encryptionService.generateHash(
                 user.password,
             );
 
@@ -151,7 +151,7 @@ describe("POST /auth/login", () => {
 
             const userRepository = AppDataSource.getRepository(User);
 
-            const hashedPassword = await encryptionService.getEncryptedHash(
+            const hashedPassword = await encryptionService.generateHash(
                 user.password,
             );
 
