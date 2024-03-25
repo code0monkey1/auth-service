@@ -14,7 +14,7 @@
         "prepare": "husky",
         "start": " NODE_ENV=prod ts-node src/index.ts",
         "migration:generate": "typeorm-ts-node-commonjs migration:generate",
-        "migration:create": "typeorm-ts-node-commonjs migration:create"
+        "migration:run": "typeorm-ts-node-commonjs migration:run"
     },
     "author": "Chiranjeev Thomas",
     "license": "ISC",
