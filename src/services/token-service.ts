@@ -13,31 +13,24 @@ export class TokenService {
     constructor(
         private readonly refreshTokenRepository: Repository<RefreshToken>,
     ) {}
+
     generateAccessToken = (jwtPayload: JwtPayload) => {
         const privateKey: Buffer = this.getPrivateKey();
 
-        const accessToken = jwt.sign(jwtPayload, privateKey, {
+        return jwt.sign(jwtPayload, privateKey, {
             algorithm: "RS256",
             expiresIn: "1h",
             issuer: "auth-service",
         });
-
-        return accessToken;
     };
 
     generateRefreshToken = (jwtPayload: JwtPayload) => {
-        const refreshToken = jwt.sign(
-            jwtPayload,
-            Config.REFRESH_TOKEN_JWT_SECRET!,
-            {
-                algorithm: "HS256",
-                expiresIn: "1y",
-                issuer: "auth-service",
-                jwtid: String(jwtPayload.id),
-            },
-        );
-
-        return refreshToken;
+        return jwt.sign(jwtPayload, Config.REFRESH_TOKEN_JWT_SECRET!, {
+            algorithm: "HS256",
+            expiresIn: "1y",
+            issuer: "auth-service",
+            jwtid: String(jwtPayload.id),
+        });
     };
 
     setAccessToken = (res: Response, jwtPayload: JwtPayload) => {
@@ -79,19 +72,15 @@ export class TokenService {
         // default set to one year
         const YEARS = 60 * 60 * 24 * 365 * years;
 
-        const newRefreshToken = await this.refreshTokenRepository.save({
-            user: user,
+        return await this.refreshTokenRepository.save({
+            user,
             expiresAt: new Date(Date.now() + YEARS),
         });
-
-        return newRefreshToken;
     };
 
     private getPrivateKey = () => {
-        let privateKey: Buffer;
-
         try {
-            privateKey = fs.readFileSync(
+            return fs.readFileSync(
                 path.join(__dirname, "../../certs/private.pem"),
             );
         } catch (e) {
@@ -101,6 +90,5 @@ export class TokenService {
             );
             throw error;
         }
-        return privateKey;
     };
 }

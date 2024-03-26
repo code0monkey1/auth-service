@@ -32,12 +32,9 @@ export default expressjwt({
             // if refreshToken is found in the db  , send false , else send true
             return refreshToken === null;
         } catch (e) {
-            let message = "";
-            if (e instanceof Error) {
-                message = e.message;
-            }
+            const message = e instanceof Error ? e.message : "";
             logger.error(
-                "Error while retrieving the refresh token : " + message,
+                `Error while retrieving the refresh token : ${message}`,
                 {
                     id: (token?.payload as RefreshTokenPayload).id,
                 },

@@ -51,7 +51,7 @@ export class AuthController {
                 password,
             });
 
-            const jwtPayload: JwtPayload = {
+            const jwtPayload = {
                 userId: String(user.id),
                 role: user.role,
             };

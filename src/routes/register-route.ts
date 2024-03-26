@@ -13,9 +13,11 @@ import parseRefreshToken from "../middleware/parseRefreshToken";
 
 import { authControllerFactory } from "./serviceFactory/authControllerFactory";
 
-const route = Router();
-
 const authController = authControllerFactory();
+
+// Register Router
+
+const route = Router();
 
 route.post("/register", registerValidator, authController.register);
 
