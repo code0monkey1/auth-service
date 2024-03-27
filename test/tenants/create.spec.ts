@@ -40,8 +40,34 @@ describe("POST /tenant", () => {
         };
 
         //act
-        const result = await api.post(BASE_URL).send(tenant).expect(201);
+        await api.post(BASE_URL).send(tenant).expect(201);
     });
-    it.todo("should create a tenant when set by admin");
+    it("should create a tenant in db", async () => {
+        // arrange
+        const tenant = {
+            name: "name",
+            address: "address",
+        };
+        const tenantRepository = connection.getRepository(Tenant);
+
+        const tenantsBefore = await tenantRepository.find();
+
+        //act
+
+        await api.post(BASE_URL).send(tenant).expect(201);
+
+        //assert
+        assertCreatesNewTenant(tenant, tenantsBefore);
+    });
     it.todo("should not create a tenant when not set by admin");
 });
+
+async function assertCreatesNewTenant(tenant: any, tenantsBefore: any) {
+    const tenantRepository = connection.getRepository(Tenant);
+    const tenantsAfter = await tenantRepository.find();
+
+    expect(tenantsAfter[tenantsAfter.length - 1].name).toBe(tenant.name);
+    expect(tenantsAfter[tenantsAfter.length - 1].address).toBe(tenant.address);
+
+    expect(tenantsAfter.length).toBe(tenantsBefore.length + 1);
+}

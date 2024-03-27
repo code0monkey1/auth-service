@@ -11,7 +11,7 @@ import authenticate from "../middleware/authenticate";
 
 import parseRefreshToken from "../middleware/parseRefreshToken";
 
-import { authControllerFactory } from "./serviceFactory/authControllerFactory";
+import { authControllerFactory } from "./controllerFactory/authControllerFactory";
 
 const authController = authControllerFactory();
 

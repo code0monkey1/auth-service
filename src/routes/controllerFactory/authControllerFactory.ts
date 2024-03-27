@@ -1,7 +1,7 @@
 import logger from "../../config/logger";
 import { AuthController } from "../../controllers/AuthController";
-import { createTokenService } from "./tokenServiceFactory";
-import { createUserService } from "./userServiceFactory";
+import { createTokenService } from "../serviceFactory/tokenServiceFactory";
+import { createUserService } from "../serviceFactory/userServiceFactory";
 
 export const authControllerFactory = () => {
     const userService = createUserService();
