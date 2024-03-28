@@ -9,14 +9,14 @@ import { ROLES } from "../../src/constants";
 
 const app = setupApp();
 const api = supertest(app);
-const BASE_URL = "/tenant";
+const BASE_URL = "/tenants";
 
 let connection: DataSource;
 let jwks_server: JWKSMock;
 const JWKS_URI = "http://localhost:3000";
 let authToken: string;
 
-describe("POST /tenant", () => {
+describe("POST /tenants", () => {
     beforeAll(async () => {
         connection = await AppDataSource.initialize();
         jwks_server = createMockJwks(JWKS_URI);

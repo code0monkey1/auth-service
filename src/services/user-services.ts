@@ -73,6 +73,14 @@ export class UserService implements UserServiceInterface<UserData, User> {
 
     findById = async (id: number) => {
         const user = await this.userRepository.findOne({ where: { id } });
+
+        if (!user) {
+            const error = createHttpError(
+                404,
+                `Tenant with id: ${id} does not exist`,
+            );
+            throw error;
+        }
         return user;
     };
 }
