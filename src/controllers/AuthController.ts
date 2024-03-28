@@ -92,13 +92,13 @@ export class AuthController {
 
     login = async (req: RegisterRequest, res: Response, next: NextFunction) => {
         try {
-            const { email, password } = req.body;
-
             const result = validationResult(req);
 
             if (!result.isEmpty()) {
                 return res.status(400).json({ errors: result.array() });
             }
+
+            const { email, password } = req.body;
 
             this.logger.info(
                 "Request to login user",

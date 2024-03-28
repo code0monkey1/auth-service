@@ -50,84 +50,136 @@ describe("POST /tenant", () => {
         await userRepository.delete({});
     };
 
-    describe("given all fields are valid", () => {});
+    describe("given all fields are valid", () => {
+        it("should get 201 ok ", async () => {
+            const tenant = {
+                name: "name",
+                address: "address",
+            };
 
-    it("should get 201 ok ", async () => {
-        const tenant = {
-            name: "name",
-            address: "address",
-        };
+            //act
+            await api
+                .post(BASE_URL)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .send(tenant)
+                .expect(201);
+        });
+        it("should create a tenant in db", async () => {
+            // arrange
+            const tenant = {
+                name: "name",
+                address: "address",
+            };
+            const tenantRepository = connection.getRepository(Tenant);
 
-        //act
-        await api
-            .post(BASE_URL)
-            .set("Cookie", [`accessToken=${authToken};`])
-            .send(tenant)
-            .expect(201);
-    });
-    it("should create a tenant in db", async () => {
-        // arrange
-        const tenant = {
-            name: "name",
-            address: "address",
-        };
-        const tenantRepository = connection.getRepository(Tenant);
+            const tenantsBefore = await tenantRepository.find();
 
-        const tenantsBefore = await tenantRepository.find();
+            //act
 
-        //act
+            await api
+                .post(BASE_URL)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .send(tenant)
+                .expect(201);
 
-        await api
-            .post(BASE_URL)
-            .set("Cookie", [`accessToken=${authToken};`])
-            .send(tenant)
-            .expect(201);
+            //assert
+            assertCreatesNewTenant(tenant, tenantsBefore);
+        });
+        it("should return 401 if user is not authenticated", async () => {
+            // arrange
+            const tenant = {
+                name: "name",
+                address: "address",
+            };
+            const tenantRepository = connection.getRepository(Tenant);
 
-        //assert
-        assertCreatesNewTenant(tenant, tenantsBefore);
-    });
-    it("should return 401 if user is not authenticated", async () => {
-        // arrange
-        const tenant = {
-            name: "name",
-            address: "address",
-        };
-        const tenantRepository = connection.getRepository(Tenant);
+            //act
 
-        //act
+            await api.post(BASE_URL).send(tenant).expect(401);
 
-        await api.post(BASE_URL).send(tenant).expect(401);
+            // assert
+            const tenants = await tenantRepository.find();
 
-        // assert
-        const tenants = await tenantRepository.find();
-
-        expect(tenants.length).toBe(0);
-    });
-
-    it("should return 403 if user is not an ADMIN ", async () => {
-        // arrange
-        const tenant = {
-            name: "name",
-            address: "address",
-        };
-        const tenantRepository = connection.getRepository(Tenant);
-
-        //act
-        const customerToken = jwks_server.token({
-            userId: "1",
-            role: ROLES.CUSTOMER,
+            expect(tenants.length).toBe(0);
         });
 
-        await api
-            .post(BASE_URL)
-            .set("Cookie", [`accessToken=${customerToken};`])
-            .send(tenant)
-            .expect(403);
+        it("should return 403 if user is not an ADMIN ", async () => {
+            // arrange
+            const tenant = {
+                name: "name",
+                address: "address",
+            };
+            const tenantRepository = connection.getRepository(Tenant);
 
-        // assert
-        const tenants = await tenantRepository.find();
+            //act
+            const customerToken = jwks_server.token({
+                userId: "1",
+                role: ROLES.CUSTOMER,
+            });
 
-        expect(tenants).toHaveLength(0);
+            await api
+                .post(BASE_URL)
+                .set("Cookie", [`accessToken=${customerToken};`])
+                .send(tenant)
+                .expect(403);
+
+            // assert
+            const tenants = await tenantRepository.find();
+
+            expect(tenants).toHaveLength(0);
+        });
+    });
+
+    describe("given some fields are missing", () => {
+        it("should return 400 if user does not have `name` field ", async () => {
+            // arrange
+            const tenant = {
+                address: "address",
+            };
+            const tenantRepository = connection.getRepository(Tenant);
+
+            //act
+            const customerToken = jwks_server.token({
+                userId: "1",
+                role: ROLES.ADMIN,
+            });
+
+            await api
+                .post(BASE_URL)
+                .set("Cookie", [`accessToken=${customerToken};`])
+                .send(tenant)
+                .expect(400);
+
+            // assert
+            const tenants = await tenantRepository.find();
+
+            expect(tenants).toHaveLength(0);
+        });
+
+        it("should return 400 if user does not have `address` field ", async () => {
+            // arrange
+            const tenant = {
+                name: "name",
+            };
+            const tenantRepository = connection.getRepository(Tenant);
+
+            //act
+            const customerToken = jwks_server.token({
+                userId: "1",
+                role: ROLES.ADMIN,
+            });
+
+            await api
+                .post(BASE_URL)
+                .set("Cookie", [`accessToken=${customerToken};`])
+                .send(tenant)
+                .expect(400);
+
+            // assert
+            const tenants = await tenantRepository.find();
+
+            expect(tenants).toHaveLength(0);
+        });
     });
 });
 

@@ -7,7 +7,11 @@ export type TenantData = {
 export class TenantService {
     constructor(private readonly tenantRepository: Repository<Tenant>) {}
 
-    async create(tenantData: TenantData) {
+    create = async (tenantData: TenantData) => {
         return await this.tenantRepository.save(tenantData);
-    }
+    };
+
+    findById = async (id: number) => {
+        return await this.tenantRepository.findOne({ where: { id } });
+    };
 }
