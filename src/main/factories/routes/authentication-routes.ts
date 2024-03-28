@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { Express, Router } from "express";
-import { makeAuthController } from "../../../routes/controllerFactory/authControllerFactory";
+import { makeAuthController } from "../controllers/auth-controller-factory";
 import authenticate from "../../../middleware/authenticate";
 import parseRefreshToken from "../../../middleware/parseRefreshToken";
 import validateRefreshToken from "../../../middleware/validateRefreshToken";

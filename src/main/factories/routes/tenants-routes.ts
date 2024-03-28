@@ -3,11 +3,11 @@ import { Router, Express } from "express";
 import { ROLES } from "../../../constants";
 import authenticate from "../../../middleware/authenticate";
 import { canAccess } from "../../../middleware/canAccess";
-import { createTenantControllerFactory } from "../../../routes/controllerFactory/tenantControllerFactory";
+import { makeTenantController } from "../controllers/tenant-controller-factory";
 import createTenantValidator from "../../../validators/create-tenant-validator";
 import updateTenantValidator from "../../../validators/update-tenant-validator";
 
-const tenantController = createTenantControllerFactory();
+const tenantController = makeTenantController();
 
 export default (app: Express): void => {
     const route = Router();
