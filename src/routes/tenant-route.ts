@@ -33,4 +33,11 @@ route.patch(
     tenantController.update,
 );
 
+route.delete(
+    "/:id",
+    authenticate,
+    canAccess([ROLES.ADMIN]),
+    tenantController.delete,
+);
+
 export default route;

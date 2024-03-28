@@ -35,7 +35,7 @@ export class TenantController {
     };
     getById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const id = req.params.id?.trim();
+            const id = req.params.id;
 
             if (!id || id === "undefined") {
                 const error = createHttpError(
@@ -81,6 +81,26 @@ export class TenantController {
             );
 
             res.status(200).json(updatedTenant);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    delete = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = req.params.id;
+
+            if (!id || id === "undefined") {
+                const error = createHttpError(
+                    400,
+                    "Missing id parameter in the request",
+                );
+                return next(error);
+            }
+
+            await this.tenantService.delete(Number(id));
+
+            res.status(200).end();
         } catch (e) {
             next(e);
         }

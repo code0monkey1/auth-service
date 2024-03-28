@@ -58,4 +58,20 @@ export class TenantService {
 
         return updatedTenant;
     };
+
+    delete = async (id: number) => {
+        const tenant = await this.tenantRepository.findOne({
+            where: { id },
+        });
+
+        if (!tenant) {
+            const error = createHttpError(
+                404,
+                `Tenant with id: ${id} does not exist`,
+            );
+            throw error;
+        }
+
+        await this.tenantRepository.delete(id);
+    };
 }
