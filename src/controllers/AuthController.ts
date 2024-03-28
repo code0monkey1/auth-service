@@ -7,10 +7,11 @@ import { validationResult } from "express-validator";
 import { TokenService } from "../services/token-service";
 import { JwtPayload } from "jsonwebtoken";
 import createHttpError from "http-errors";
-interface AuthRequest extends Request {
+import { RoleType } from "../constants";
+export interface AuthRequest extends Request {
     auth: {
         userId: string;
-        role: string;
+        role: RoleType;
         id: string;
     };
 }

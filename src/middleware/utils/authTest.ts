@@ -3,7 +3,7 @@ import jwksClient from "jwks-rsa";
 import { Request, Response, NextFunction } from "express";
 import { Config } from "../../config";
 import { isBearerToken } from ".";
-import { AuthCookie } from "../types";
+import { AuthCookie } from "./types";
 
 export interface CustomRequest extends Request {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

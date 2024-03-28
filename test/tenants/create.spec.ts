@@ -103,6 +103,32 @@ describe("POST /tenant", () => {
 
         expect(tenants.length).toBe(0);
     });
+
+    it("should return 403 if user is not an ADMIN ", async () => {
+        // arrange
+        const tenant = {
+            name: "name",
+            address: "address",
+        };
+        const tenantRepository = connection.getRepository(Tenant);
+
+        //act
+        const customerToken = jwks_server.token({
+            userId: "1",
+            role: ROLES.CUSTOMER,
+        });
+
+        await api
+            .post(BASE_URL)
+            .set("Cookie", [`accessToken=${customerToken};`])
+            .send(tenant)
+            .expect(403);
+
+        // assert
+        const tenants = await tenantRepository.find();
+
+        expect(tenants).toHaveLength(0);
+    });
 });
 
 async function assertCreatesNewTenant(tenant: any, tenantsBefore: any) {

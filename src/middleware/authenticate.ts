@@ -3,7 +3,7 @@ import jwksClient from "jwks-rsa";
 import { Config } from "../config";
 import { Request } from "express";
 import { isBearerToken } from "./utils";
-import { AuthCookie } from "./types";
+import { AuthCookie } from "./utils/types";
 
 export default expressjwt({
     secret: jwksClient.expressJwtSecret({

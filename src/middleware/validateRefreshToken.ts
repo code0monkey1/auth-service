@@ -1,7 +1,7 @@
 import { expressjwt } from "express-jwt";
 import { Config } from "../config";
 import { Request } from "express";
-import { AuthCookie, RefreshTokenPayload } from "./types";
+import { AuthCookie, RefreshTokenPayload } from "./utils/types";
 import { AppDataSource } from "../config/data-source";
 import { RefreshToken } from "../entity/RefreshToken";
 import logger from "../config/logger";
