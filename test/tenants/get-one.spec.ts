@@ -1,7 +1,6 @@
 import supertest from "supertest";
 import { DataSource } from "typeorm";
 import { AppDataSource } from "../../src/config/data-source";
-import { User } from "../../src/entity/User";
 import setupApp from "../../src/config/app";
 import { Tenant } from "../../src/entity/Tenant";
 import createMockJwks, { JWKSMock } from "mock-jwks";
@@ -9,14 +8,14 @@ import { ROLES } from "../../src/constants";
 
 const app = setupApp();
 const api = supertest(app);
-const BASE_URL = "/tenant";
+const BASE_URL = "/tenants";
 
 let connection: DataSource;
 let jwks_server: JWKSMock;
 const JWKS_URI = "http://localhost:3000";
 let authToken: string;
 
-describe("GET /tenant/:id", () => {
+describe("GET /tenants/:id", () => {
     beforeAll(async () => {
         connection = await AppDataSource.initialize();
         jwks_server = createMockJwks(JWKS_URI);
@@ -45,9 +44,6 @@ describe("GET /tenant/:id", () => {
     const clearDatabase = async () => {
         const tenantRepository = connection.getRepository(Tenant);
         await tenantRepository.delete({});
-
-        const userRepository = connection.getRepository(User);
-        await userRepository.delete({});
     };
 
     it("should return 401 if user is not authenticated", async () => {
@@ -94,11 +90,6 @@ describe("GET /tenant/:id", () => {
 
         const savedTenant = await tenantRepository.save(tenant);
 
-        console.log(
-            "The saved tenant is",
-            JSON.stringify(savedTenant, null, 2),
-        );
-
         //act
         await api
             .get(`${BASE_URL}/${savedTenant.id + 1}`)
@@ -120,11 +111,6 @@ describe("GET /tenant/:id", () => {
 
         const savedTenant = await tenantRepository.save(tenant);
 
-        console.log(
-            "The saved tenant is",
-            JSON.stringify(savedTenant, null, 2),
-        );
-
         const customerToken = jwks_server.token({
             userId: "1",
             role: ROLES.CUSTOMER,
@@ -141,7 +127,7 @@ describe("GET /tenant/:id", () => {
         expect(tenants.length).toBe(1);
     });
 
-    it("should  return status 400 if tenant id not provided in params", async () => {
+    it("should  return status 400 if id not provided in params", async () => {
         let id;
         //act
         await api

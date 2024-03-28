@@ -47,17 +47,40 @@ export class TenantController {
 
             const tenant = await this.tenantService.findById(Number(id));
 
-            if (!tenant) {
+            res.status(200).json(tenant);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    get = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tenants = await this.tenantService.find();
+
+            res.status(200).json(tenants);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    update = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = req.params.id;
+
+            if (!id || id === "undefined") {
                 const error = createHttpError(
-                    404,
-                    `Tenant with id: ${id} does not exist`,
+                    400,
+                    "Missing id parameter in the request",
                 );
                 return next(error);
             }
 
-            this.logger.info(" 🥳 found tenant with id : " + tenant.id);
+            const updatedTenant = await this.tenantService.update(
+                Number(id),
+                req.body as Partial<TenantData>,
+            );
 
-            res.status(200).json(tenant);
+            res.status(200).json(updatedTenant);
         } catch (e) {
             next(e);
         }
