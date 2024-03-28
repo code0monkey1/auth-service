@@ -1,7 +1,9 @@
 import { Express } from "express";
-import registerRoute from "../routes/register-route";
-import tenantRoute from "../routes/tenant-route";
+// import tenantRoute from "../routes/tenant-route";
+import authenticationRoutes from "../main/factories/routers/authentication-routes";
+import tenantsRoutes from "../main/factories/routers/tenants-routes";
+// import registerRoute from "../routes/register-route";
 export default (app: Express): void => {
-    app.use("/auth", registerRoute);
-    app.use("/tenants", tenantRoute);
+    authenticationRoutes(app);
+    tenantsRoutes(app);
 };

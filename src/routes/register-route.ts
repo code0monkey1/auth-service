@@ -11,9 +11,9 @@ import authenticate from "../middleware/authenticate";
 
 import parseRefreshToken from "../middleware/parseRefreshToken";
 
-import { authControllerFactory } from "./controllerFactory/authControllerFactory";
+import { makeAuthController } from "./controllerFactory/authControllerFactory";
 
-const authController = authControllerFactory();
+const authController = makeAuthController();
 
 // Register Router
 

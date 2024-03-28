@@ -3,7 +3,7 @@ import { AuthController } from "../../controllers/AuthController";
 import { createTokenService } from "../serviceFactory/tokenServiceFactory";
 import { createUserService } from "../serviceFactory/userServiceFactory";
 
-export const authControllerFactory = () => {
+export const makeAuthController = () => {
     const userService = createUserService();
     const tokenService = createTokenService();
 
