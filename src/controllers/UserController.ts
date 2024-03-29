@@ -1,34 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { NextFunction, Request, Response } from "express";
-import { RegisterRequest } from "../types";
+import { AuthRequest, CreateUserRequest, RegisterRequest } from "../types";
 import { UserService } from "../services/user-services";
 import { Logger } from "winston";
 import { validationResult } from "express-validator";
 import { TokenService } from "../services/token-service";
 import { JwtPayload } from "jsonwebtoken";
 import createHttpError from "http-errors";
-import { ROLES, RoleType } from "../constants";
-export interface AuthRequest extends Request {
-    auth: {
-        userId: string;
-        role: RoleType;
-        id: string;
-    };
-}
-export class AuthController {
+
+export class UserController {
     constructor(
         private readonly userService: UserService,
         private readonly logger: Logger,
         private readonly tokenService: TokenService,
     ) {}
 
-    register = async (
-        req: RegisterRequest,
-        res: Response,
-        next: NextFunction,
-    ) => {
+    create = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { firstName, lastName, email, password } = req.body;
+            const _req = req as CreateUserRequest;
+
+            const { firstName, lastName, email, password, role } = _req.body;
 
             const result = validationResult(req);
 
@@ -50,7 +41,7 @@ export class AuthController {
                 lastName,
                 email,
                 password,
-                role: ROLES.CUSTOMER,
+                role,
             });
 
             const jwtPayload = {

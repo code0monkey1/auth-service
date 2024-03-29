@@ -2,7 +2,6 @@ import { Repository } from "typeorm";
 import { User } from "../entity/User";
 import { UserData } from "../types";
 import createHttpError from "http-errors";
-import { ROLES } from "../constants";
 import { EncryptionService } from "./encryption-service";
 import { UserServiceInterface } from "../application/interfaces/use-cases/services/user/user-service-interface";
 
@@ -22,7 +21,7 @@ export class UserService implements UserServiceInterface<UserData, User> {
             throw error;
         }
 
-        const { firstName, lastName, email } = userData;
+        const { firstName, lastName, email, role } = userData;
 
         const hashedPassword = await this.encryptionService.generateHash(
             userData.password,
@@ -33,7 +32,7 @@ export class UserService implements UserServiceInterface<UserData, User> {
                 firstName,
                 lastName,
                 email,
-                role: ROLES.CUSTOMER,
+                role,
                 hashedPassword,
             });
 

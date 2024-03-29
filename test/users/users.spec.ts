@@ -57,6 +57,7 @@ describe("GET /auth/self", () => {
         };
 
         const userRepository = connection.getRepository(User);
+
         const user = await userRepository.save({
             ...userData,
             role: ROLES.CUSTOMER,

@@ -102,6 +102,7 @@ describe("POST /auth/register", () => {
                 lastName: "b",
                 email: "c@gmail.com",
                 password: "12345678",
+                role: ROLES.CUSTOMER,
             };
 
             //act
@@ -114,7 +115,7 @@ describe("POST /auth/register", () => {
             expect(users).toHaveLength(1);
 
             //check user is the same
-            expect(users[0].role).toBe(ROLES.CUSTOMER);
+            expect(users[0].role).toBe(user.role);
         });
 
         it("should store hashed password in the database", async () => {
