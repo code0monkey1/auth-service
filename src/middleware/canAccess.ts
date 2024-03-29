@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { AuthRequest } from "../controllers/AuthController";
 import createHttpError from "http-errors";
 import { RoleType } from "../constants";
+import { AuthRequest } from "../types";
 
 export const canAccess =
     (roles = [] as RoleType[]) =>

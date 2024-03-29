@@ -1,20 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { NextFunction, Request, Response } from "express";
-import { RegisterRequest } from "../types";
+import { AuthRequest, RegisterRequest } from "../types";
 import { UserService } from "../services/user-services";
 import { Logger } from "winston";
 import { validationResult } from "express-validator";
 import { TokenService } from "../services/token-service";
 import { JwtPayload } from "jsonwebtoken";
 import createHttpError from "http-errors";
-import { ROLES, RoleType } from "../constants";
-export interface AuthRequest extends Request {
-    auth: {
-        userId: string;
-        role: RoleType;
-        id: string;
-    };
-}
+import { ROLES } from "../constants";
+
 export class AuthController {
     constructor(
         private readonly userService: UserService,
