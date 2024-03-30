@@ -41,13 +41,13 @@ export default (app: Express): void => {
         updateTenantValidator,
         authenticate,
         canAccess([ROLES.ADMIN]),
-        tenantController.update,
+        tenantController.updateById,
     );
 
     route.delete(
         "/:id",
         authenticate,
         canAccess([ROLES.ADMIN]),
-        tenantController.delete,
+        tenantController.deleteById,
     );
 };

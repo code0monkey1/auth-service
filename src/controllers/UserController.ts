@@ -20,7 +20,8 @@ export class UserController {
         try {
             const _req = req as CreateUserRequest;
 
-            const { firstName, lastName, email, password, role } = _req.body;
+            const { firstName, lastName, email, password, role, tenantId } =
+                _req.body;
 
             const result = validationResult(req);
 
@@ -43,6 +44,7 @@ export class UserController {
                 email,
                 password,
                 role,
+                tenantId,
             });
 
             const jwtPayload = {
@@ -163,7 +165,7 @@ export class UserController {
         try {
             const id = req.params.id;
 
-            if (!id || id === "undefined") {
+            if (isNaN(Number(id))) {
                 const error = createHttpError(
                     400,
                     "Missing id parameter in the request",
@@ -179,17 +181,17 @@ export class UserController {
                 return;
             }
 
-            res.json({ ...user, hashedPassword: undefined });
+            res.json({ ...user });
         } catch (e) {
             next(e);
         }
     };
 
-    update = async (req: Request, res: Response, next: NextFunction) => {
+    updateById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const id = req.params.id.trim();
+            const id = req.params.id;
 
-            if (!id || id === "undefined") {
+            if (isNaN(Number(id))) {
                 const error = createHttpError(
                     400,
                     "Missing id parameter in the request",
@@ -197,7 +199,7 @@ export class UserController {
                 return next(error);
             }
 
-            const updatedUser = await this.userService.update(
+            const updatedUser = await this.userService.updateById(
                 Number(id),
                 req.body as Partial<User>,
             );
@@ -208,11 +210,11 @@ export class UserController {
         }
     };
 
-    delete = async (req: Request, res: Response, next: NextFunction) => {
+    deleteById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const id = req.params.id;
 
-            if (!id || id === "undefined") {
+            if (isNaN(Number(id))) {
                 const error = createHttpError(
                     400,
                     "Missing id parameter in the request",
@@ -220,9 +222,11 @@ export class UserController {
                 return next(error);
             }
 
-            await this.userService.delete(Number(id));
+            await this.userService.deleteById(Number(id));
 
-            res.status(200).end();
+            this.logger.info("User has been deleted");
+
+            res.json({ id });
         } catch (e) {
             next(e);
         }
@@ -242,7 +246,7 @@ export class UserController {
                 return;
             }
 
-            res.json({ ...user, hashedPassword: undefined });
+            res.json({ ...user });
         } catch (e) {
             next(e);
         }

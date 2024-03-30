@@ -41,13 +41,13 @@ export default (app: Express): void => {
         "/:id",
         authenticate,
         canAccess([ROLES.ADMIN]),
-        userController.update,
+        userController.updateById,
     );
 
     route.delete(
         "/:id",
         authenticate,
         canAccess([ROLES.ADMIN]),
-        userController.delete,
+        userController.deleteById,
     );
 };

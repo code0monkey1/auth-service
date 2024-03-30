@@ -30,4 +30,9 @@ export default checkSchema({
         errorMessage: "role is missing",
         notEmpty: true,
     },
+
+    tenantId: {
+        errorMessage: "tenantId is missing",
+        notEmpty: true,
+    },
 });

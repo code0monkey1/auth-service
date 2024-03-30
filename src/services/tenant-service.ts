@@ -39,7 +39,7 @@ export class TenantService {
         return await this.tenantRepository.find();
     };
 
-    update = async (id: number, updatedBody: Partial<TenantData>) => {
+    updateById = async (id: number, updatedBody: Partial<TenantData>) => {
         const tenant = await this.tenantRepository.findOne({ where: { id } });
 
         if (!tenant) {
@@ -59,7 +59,7 @@ export class TenantService {
         return updatedTenant;
     };
 
-    delete = async (id: number) => {
+    deleteById = async (id: number) => {
         const tenant = await this.tenantRepository.findOne({
             where: { id },
         });

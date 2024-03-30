@@ -18,7 +18,7 @@ export class User {
     @Column({ nullable: true })
     role: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, select: false })
     hashedPassword: string;
 
     @ManyToOne(() => Tenant, { onDelete: "CASCADE" })

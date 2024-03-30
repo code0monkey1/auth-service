@@ -51,6 +51,14 @@ describe("POST /users", () => {
     describe("when all fields are present", () => {
         it("should return status code 201 , when created by ADMIN", async () => {
             //act
+            const tenantData = {
+                name: "any_name",
+                address: "any_address",
+            };
+
+            const tenantRepository = connection.getRepository(Tenant);
+
+            const tenant = await tenantRepository.save(tenantData);
 
             const userData = {
                 firstName: "a",
@@ -58,6 +66,7 @@ describe("POST /users", () => {
                 email: "femail@gmail.com",
                 password: "********",
                 role: ROLES.MANAGER,
+                tenantId: tenant.id,
             };
 
             await api
@@ -68,6 +77,14 @@ describe("POST /users", () => {
         });
         it("should return status code 201 , when created by ADMIN", async () => {
             //act
+            const tenantData = {
+                name: "any_name",
+                address: "any_address",
+            };
+
+            const tenantRepository = connection.getRepository(Tenant);
+
+            const tenant = await tenantRepository.save(tenantData);
 
             const userData = {
                 firstName: "a",
@@ -75,6 +92,7 @@ describe("POST /users", () => {
                 email: "femail@gmail.com",
                 password: "********",
                 role: ROLES.MANAGER,
+                tenantId: tenant.id,
             };
 
             await api
@@ -121,13 +139,21 @@ describe("POST /users", () => {
         });
         it("should persist user in DB ", async () => {
             //arrange
+            const tenantData = {
+                name: "any_name",
+                address: "any_address",
+            };
 
+            const tenantRepository = connection.getRepository(Tenant);
+
+            const tenant = await tenantRepository.save(tenantData);
             const userData = {
                 firstName: "a",
                 lastName: "b",
                 email: "femail@gmail.com",
                 password: "********",
                 role: ROLES.MANAGER,
+                tenantId: tenant.id,
             };
             //act
             await api
@@ -150,12 +176,22 @@ describe("POST /users", () => {
         it("should create user with MANAGER role  ", async () => {
             //arrange
 
+            const tenantData = {
+                name: "any_name",
+                address: "any_address",
+            };
+
+            const tenantRepository = connection.getRepository(Tenant);
+
+            const tenant = await tenantRepository.save(tenantData);
+
             const userData = {
                 firstName: "a",
                 lastName: "b",
                 email: "femail@gmail.com",
                 password: "********",
                 role: ROLES.MANAGER,
+                tenantId: tenant.id,
             };
             //act
             await api
@@ -176,13 +212,24 @@ describe("POST /users", () => {
         it("should return user id in response body json ", async () => {
             //arrange
 
+            const tenantData = {
+                name: "any_name",
+                address: "any_address",
+            };
+
+            const tenantRepository = connection.getRepository(Tenant);
+
+            const tenant = await tenantRepository.save(tenantData);
+
             const userData = {
                 firstName: "a",
                 lastName: "b",
                 email: "femail@gmail.com",
                 password: "********",
                 role: ROLES.MANAGER,
+                tenantId: tenant.id,
             };
+
             //act
             const response = await api
                 .post(BASE_URL)
@@ -241,6 +288,32 @@ describe("POST /users", () => {
             // assert
 
             expect(response.body.errors[0].msg).toBe("role is missing");
+
+            const repo = await connection.getRepository(User);
+            const users = await repo.find();
+
+            expect(users).toHaveLength(0);
+        });
+
+        it("Should return 400 status code if tenantId not present", async () => {
+            //arrange
+            const user = {
+                firstName: "a",
+                lastName: "c",
+                email: " b@gmail.com ",
+                password: "********",
+                role: ROLES.MANAGER,
+            };
+
+            //act
+            const response = await api
+                .post(BASE_URL)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .send(user)
+                .expect(400);
+            // assert
+
+            expect(response.body.errors[0].msg).toBe("tenantId is missing");
 
             const repo = await connection.getRepository(User);
             const users = await repo.find();

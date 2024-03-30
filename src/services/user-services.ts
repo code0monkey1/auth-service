@@ -21,7 +21,7 @@ export class UserService implements UserServiceInterface<UserData, User> {
             throw error;
         }
 
-        const { firstName, lastName, email, role } = userData;
+        const { firstName, lastName, email, role, tenantId } = userData;
 
         const hashedPassword = await this.encryptionService.generateHash(
             userData.password,
@@ -34,6 +34,8 @@ export class UserService implements UserServiceInterface<UserData, User> {
                 email,
                 role,
                 hashedPassword,
+                //you have to pass either instance , or just id of the object , like so
+                tenant: tenantId ? { id: Number(tenantId) } : undefined,
             });
 
             return user as User & { id: string };
@@ -47,7 +49,7 @@ export class UserService implements UserServiceInterface<UserData, User> {
         }
     };
 
-    delete = async (id: number) => {
+    deleteById = async (id: number) => {
         const tenant = await this.userRepository.findOne({
             where: { id },
         });
@@ -63,7 +65,7 @@ export class UserService implements UserServiceInterface<UserData, User> {
         await this.userRepository.delete(id);
     };
 
-    update = async (id: number, updatedBody: Partial<User>) => {
+    updateById = async (id: number, updatedBody: Partial<User>) => {
         const user = await this.userRepository.findOne({ where: { id } });
 
         if (!user) {
@@ -86,6 +88,7 @@ export class UserService implements UserServiceInterface<UserData, User> {
     findByEmailAndPassword = async (email: string, password: string) => {
         const user = await this.userRepository.findOne({
             where: { email },
+            select: ["hashedPassword"],
         });
 
         const isValidUser =

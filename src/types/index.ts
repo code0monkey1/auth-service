@@ -7,6 +7,7 @@ export interface UserData {
     email: string;
     password: string;
     role: RoleType;
+    tenantId: number;
 }
 
 export interface RegisterRequest extends Request {

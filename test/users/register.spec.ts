@@ -131,7 +131,9 @@ describe("POST /auth/register", () => {
             await api.post(BASE_URL).send(user).expect("Content-Type", /json/);
 
             const userRepository = connection.getRepository(User);
-            const users = await userRepository.find();
+            const users = await userRepository.find({
+                select: ["hashedPassword"],
+            });
 
             //assert
             expect(users).toHaveLength(1);

@@ -37,7 +37,7 @@ export class TenantController {
         try {
             const id = req.params.id;
 
-            if (!id || id === "undefined") {
+            if (isNaN(Number(id))) {
                 const error = createHttpError(
                     400,
                     "Missing id parameter in the request",
@@ -63,11 +63,11 @@ export class TenantController {
         }
     };
 
-    update = async (req: Request, res: Response, next: NextFunction) => {
+    updateById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const id = req.params.id;
 
-            if (!id || id === "undefined") {
+            if (isNaN(Number(id))) {
                 const error = createHttpError(
                     400,
                     "Missing id parameter in the request",
@@ -75,7 +75,9 @@ export class TenantController {
                 return next(error);
             }
 
-            const updatedTenant = await this.tenantService.update(
+            this.logger.debug("Request for updating a tenant", req.body);
+
+            const updatedTenant = await this.tenantService.updateById(
                 Number(id),
                 req.body as Partial<TenantData>,
             );
@@ -86,11 +88,11 @@ export class TenantController {
         }
     };
 
-    delete = async (req: Request, res: Response, next: NextFunction) => {
+    deleteById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const id = req.params.id;
 
-            if (!id || id === "undefined") {
+            if (isNaN(Number(id))) {
                 const error = createHttpError(
                     400,
                     "Missing id parameter in the request",
@@ -98,7 +100,7 @@ export class TenantController {
                 return next(error);
             }
 
-            await this.tenantService.delete(Number(id));
+            await this.tenantService.deleteById(Number(id));
 
             res.status(200).end();
         } catch (e) {

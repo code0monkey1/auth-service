@@ -22,7 +22,7 @@ export class AuthController {
         next: NextFunction,
     ) => {
         try {
-            const { firstName, lastName, email, password } = req.body;
+            const { firstName, lastName, email, password, tenantId } = req.body;
 
             const result = validationResult(req);
 
@@ -45,6 +45,7 @@ export class AuthController {
                 email,
                 password,
                 role: ROLES.CUSTOMER,
+                tenantId,
             });
 
             const jwtPayload = {
@@ -128,7 +129,7 @@ export class AuthController {
                 return;
             }
 
-            res.json({ ...user, hashedPassword: undefined });
+            res.json({ ...user });
         } catch (e) {
             next(e);
         }
