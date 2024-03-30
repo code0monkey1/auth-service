@@ -47,6 +47,42 @@ export class UserService implements UserServiceInterface<UserData, User> {
         }
     };
 
+    delete = async (id: number) => {
+        const tenant = await this.userRepository.findOne({
+            where: { id },
+        });
+
+        if (!tenant) {
+            const error = createHttpError(
+                404,
+                `User with id: ${id} does not exist`,
+            );
+            throw error;
+        }
+
+        await this.userRepository.delete(id);
+    };
+
+    update = async (id: number, updatedBody: Partial<User>) => {
+        const user = await this.userRepository.findOne({ where: { id } });
+
+        if (!user) {
+            const error = createHttpError(
+                404,
+                `User with id: ${id} does not exist`,
+            );
+            throw error;
+        }
+
+        await this.userRepository.update(id, updatedBody);
+
+        const updatedUser = await this.userRepository.findOne({
+            where: { id },
+        });
+
+        return updatedUser;
+    };
+
     findByEmailAndPassword = async (email: string, password: string) => {
         const user = await this.userRepository.findOne({
             where: { email },
@@ -81,5 +117,9 @@ export class UserService implements UserServiceInterface<UserData, User> {
             throw error;
         }
         return user;
+    };
+
+    getAll = async () => {
+        return await this.userRepository.find();
     };
 }

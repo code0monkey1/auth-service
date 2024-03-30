@@ -22,4 +22,32 @@ export default (app: Express): void => {
         canAccess([ROLES.ADMIN]),
         userController.create,
     );
+
+    route.get(
+        "/",
+        authenticate,
+        canAccess([ROLES.ADMIN]),
+        userController.getAll,
+    );
+
+    route.get(
+        "/:id",
+        authenticate,
+        canAccess([ROLES.ADMIN]),
+        userController.findById,
+    );
+
+    route.patch(
+        "/:id",
+        authenticate,
+        canAccess([ROLES.ADMIN]),
+        userController.update,
+    );
+
+    route.delete(
+        "/:id",
+        authenticate,
+        canAccess([ROLES.ADMIN]),
+        userController.delete,
+    );
 };

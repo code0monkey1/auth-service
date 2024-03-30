@@ -9,7 +9,7 @@ import createMockJwks, { JWKSMock } from "mock-jwks";
 import { ROLES } from "../../src/constants";
 import { Tenant } from "../../src/entity/Tenant";
 
-describe("GET /users", () => {
+describe("DELETE /users/:id", () => {
     let connection: DataSource;
     const BASE_URL = "/users";
     let jwks_server: JWKSMock;
@@ -51,10 +51,26 @@ describe("GET /users", () => {
     it("should return status code 200 , when requested by ADMIN", async () => {
         //act
 
+        const userData = {
+            firstName: "a",
+            lastName: "b",
+            email: "femail@gmail.com",
+            password: "********",
+            role: ROLES.MANAGER,
+        };
+
+        const userRepository = connection.getRepository(User);
+
+        const savedUser = await userRepository.save(userData);
+
         await api
-            .get(BASE_URL)
+            .delete(BASE_URL + `/${savedUser.id}`)
             .set("Cookie", [`accessToken=${authToken};`])
             .expect(200);
+
+        const usersAfter = await userRepository.find();
+
+        expect(usersAfter).toHaveLength(0);
     });
 
     it("should return status code 403 , when requested by NON - ADMIN", async () => {
@@ -65,8 +81,9 @@ describe("GET /users", () => {
             role: ROLES.MANAGER,
         });
 
+        let id;
         await api
-            .get(BASE_URL)
+            .delete(BASE_URL + `/${id}`)
             .set("Cookie", [`accessToken=${authToken};`])
             .expect(403);
     });
@@ -79,6 +96,35 @@ describe("GET /users", () => {
             role: ROLES.MANAGER,
         });
 
-        await api.get(BASE_URL).expect(401);
+        let id;
+        await api.delete(BASE_URL + `/${id}`).expect(401);
+    });
+
+    it("should return status code 400 , when id not provided", async () => {
+        //act
+
+        let id;
+        const response = await api
+            .delete(BASE_URL + `/${id}`)
+            .set("Cookie", [`accessToken=${authToken};`])
+            .expect(400);
+
+        expect(response.body.errors[0].message).toBe(
+            "Missing id parameter in the request",
+        );
+    });
+
+    it("should return status code 404 , when user with id not present", async () => {
+        //act
+
+        let id = 1;
+        const response = await api
+            .delete(BASE_URL + `/${id}`)
+            .set("Cookie", [`accessToken=${authToken};`])
+            .expect(404);
+
+        expect(response.body.errors[0].message).toBe(
+            `User with id: ${id} does not exist`,
+        );
     });
 });

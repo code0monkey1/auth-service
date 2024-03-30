@@ -7,6 +7,7 @@ import { validationResult } from "express-validator";
 import { TokenService } from "../services/token-service";
 import { JwtPayload } from "jsonwebtoken";
 import createHttpError from "http-errors";
+import { User } from "../entity/User";
 
 export class UserController {
     constructor(
@@ -144,6 +145,84 @@ export class UserController {
             this.logger.info("User has logged in", { userOrError });
 
             res.json({ id: userOrError.id });
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    getAll = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const users = await this.userService.getAll();
+            res.json(users);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    findById = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = req.params.id;
+
+            if (!id || id === "undefined") {
+                const error = createHttpError(
+                    400,
+                    "Missing id parameter in the request",
+                );
+                return next(error);
+            }
+
+            const user = await this.userService.findById(Number(id));
+
+            if (!user) {
+                const error = createHttpError(404, "User not found");
+                next(error);
+                return;
+            }
+
+            res.json({ ...user, hashedPassword: undefined });
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    update = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = req.params.id.trim();
+
+            if (!id || id === "undefined") {
+                const error = createHttpError(
+                    400,
+                    "Missing id parameter in the request",
+                );
+                return next(error);
+            }
+
+            const updatedUser = await this.userService.update(
+                Number(id),
+                req.body as Partial<User>,
+            );
+
+            res.status(200).json(updatedUser);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    delete = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = req.params.id;
+
+            if (!id || id === "undefined") {
+                const error = createHttpError(
+                    400,
+                    "Missing id parameter in the request",
+                );
+                return next(error);
+            }
+
+            await this.userService.delete(Number(id));
+
+            res.status(200).end();
         } catch (e) {
             next(e);
         }
