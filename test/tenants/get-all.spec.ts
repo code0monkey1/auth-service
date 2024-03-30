@@ -46,13 +46,6 @@ describe("GET /tenants", () => {
         await tenantRepository.delete({});
     };
 
-    it("should return 401 if user is not authenticated", async () => {
-        // arrange
-
-        //act
-        await api.get(`${BASE_URL}`).expect(401);
-    });
-
     it("should return status code 200 with stored tenants", async () => {
         // arrange
         const tenant = {
@@ -73,18 +66,5 @@ describe("GET /tenants", () => {
         expect(response.body[0].address).toBe(tenant.address);
 
         expect(response.body).toHaveLength(1);
-    });
-
-    it("should return status 403 , when tenant  is not admin", async () => {
-        const customerToken = jwks_server.token({
-            userId: "1",
-            role: ROLES.CUSTOMER,
-        });
-
-        //act
-        await api
-            .get(`${BASE_URL}`)
-            .set("Cookie", [`accessToken=${customerToken};`])
-            .expect(403);
     });
 });

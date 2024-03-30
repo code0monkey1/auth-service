@@ -24,9 +24,8 @@ export default (app: Express): void => {
         tenantController.create,
     );
     route.get(
+        // this will have public access
         "/",
-        authenticate,
-        canAccess([ROLES.ADMIN]),
         tenantController.get,
     );
     route.get(
