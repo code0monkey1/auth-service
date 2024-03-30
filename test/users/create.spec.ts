@@ -7,7 +7,6 @@ const app = setupApp();
 const api = supertest(app);
 import createMockJwks, { JWKSMock } from "mock-jwks";
 import { ROLES } from "../../src/constants";
-import { TenantService } from "../../src/services/tenant-service";
 import { Tenant } from "../../src/entity/Tenant";
 
 describe("POST /users", () => {
@@ -49,132 +48,204 @@ describe("POST /users", () => {
         await tenantRepository.delete({});
     };
 
-    it("should return status code 201 , when created by ADMIN", async () => {
-        //act
+    describe("when all fields are present", () => {
+        it("should return status code 201 , when created by ADMIN", async () => {
+            //act
 
-        const userData = {
-            firstName: "a",
-            lastName: "b",
-            email: "femail@gmail.com",
-            password: "********",
-            role: ROLES.MANAGER,
-        };
+            const userData = {
+                firstName: "a",
+                lastName: "b",
+                email: "femail@gmail.com",
+                password: "********",
+                role: ROLES.MANAGER,
+            };
 
-        await api
-            .post(BASE_URL)
-            .send(userData)
-            .set("Cookie", [`accessToken=${authToken};`])
-            .expect(201);
-    });
+            await api
+                .post(BASE_URL)
+                .send(userData)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .expect(201);
+        });
+        it("should return status code 201 , when created by ADMIN", async () => {
+            //act
 
-    it("should return status code 401 , when no authorization is provided", async () => {
-        //act
+            const userData = {
+                firstName: "a",
+                lastName: "b",
+                email: "femail@gmail.com",
+                password: "********",
+                role: ROLES.MANAGER,
+            };
 
-        const userData = {
-            firstName: "a",
-            lastName: "b",
-            email: "femail@gmail.com",
-            password: "********",
-            role: ROLES.MANAGER,
-        };
-
-        await api.post(BASE_URL).send(userData).expect(401);
-    });
-
-    it("should return status code 403 , when not created by ADMIN", async () => {
-        //act
-
-        const userData = {
-            firstName: "a",
-            lastName: "b",
-            email: "femail@gmail.com",
-            role: ROLES.MANAGER,
-        };
-
-        const managerToken = jwks_server.token({
-            userId: 1,
-            role: ROLES.MANAGER,
+            await api
+                .post(BASE_URL)
+                .send(userData)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .expect(201);
         });
 
-        await api
-            .post(BASE_URL)
-            .send(userData)
-            .set("Cookie", [`accessToken=${managerToken};`])
-            .expect(403);
+        it("should return status code 401 , when no authorization is provided", async () => {
+            //act
+
+            const userData = {
+                firstName: "a",
+                lastName: "b",
+                email: "femail@gmail.com",
+                password: "********",
+                role: ROLES.MANAGER,
+            };
+
+            await api.post(BASE_URL).send(userData).expect(401);
+        });
+
+        it("should return status code 403 , when not created by ADMIN", async () => {
+            //act
+
+            const userData = {
+                firstName: "a",
+                lastName: "b",
+                email: "femail@gmail.com",
+                role: ROLES.MANAGER,
+            };
+
+            const managerToken = jwks_server.token({
+                userId: 1,
+                role: ROLES.MANAGER,
+            });
+
+            await api
+                .post(BASE_URL)
+                .send(userData)
+                .set("Cookie", [`accessToken=${managerToken};`])
+                .expect(403);
+        });
+        it("should persist user in DB ", async () => {
+            //arrange
+
+            const userData = {
+                firstName: "a",
+                lastName: "b",
+                email: "femail@gmail.com",
+                password: "********",
+                role: ROLES.MANAGER,
+            };
+            //act
+            await api
+                .post(BASE_URL)
+                .send(userData)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .expect(201);
+
+            //assert
+            const userRepository = connection.getRepository(User);
+
+            const users = await userRepository.find();
+
+            expect(users).toHaveLength(1);
+
+            expect(users[0].role).toBe(userData.role);
+            expect(users[0].email).toBe(userData.email);
+        });
+
+        it("should create user with MANAGER role  ", async () => {
+            //arrange
+
+            const userData = {
+                firstName: "a",
+                lastName: "b",
+                email: "femail@gmail.com",
+                password: "********",
+                role: ROLES.MANAGER,
+            };
+            //act
+            await api
+                .post(BASE_URL)
+                .send(userData)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .expect(201);
+
+            //assert
+            const userRepository = connection.getRepository(User);
+
+            const users = await userRepository.find();
+
+            expect(users).toHaveLength(1);
+
+            expect(users[0].role).toBe(ROLES.MANAGER);
+        });
+        it("should return user id in response body json ", async () => {
+            //arrange
+
+            const userData = {
+                firstName: "a",
+                lastName: "b",
+                email: "femail@gmail.com",
+                password: "********",
+                role: ROLES.MANAGER,
+            };
+            //act
+            const response = await api
+                .post(BASE_URL)
+                .send(userData)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .expect("Content-Type", /json/)
+                .expect(201);
+
+            //assert
+            expect(response.body.id).toBe(1);
+        });
     });
-    it("should persist user in DB ", async () => {
-        //arrange
 
-        const userData = {
-            firstName: "a",
-            lastName: "b",
-            email: "femail@gmail.com",
-            password: "********",
-            role: ROLES.MANAGER,
-        };
-        //act
-        await api
-            .post(BASE_URL)
-            .send(userData)
-            .set("Cookie", [`accessToken=${authToken};`])
-            .expect(201);
+    describe("when all fields are not present", () => {
+        it("Should return 400 status code if password length is less than 8 characters.", async () => {
+            //arrange
+            const user = {
+                firstName: "a",
+                lastName: "c",
+                email: " b@gmail.com ",
+                password: "b",
+                role: ROLES.ADMIN,
+            };
 
-        //assert
-        const userRepository = connection.getRepository(User);
+            //act
+            const response = await api
+                .post(BASE_URL)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .send(user)
+                .expect(400);
+            // assert
+            const repo = await connection.getRepository(User);
+            const users = await repo.find();
 
-        const users = await userRepository.find();
+            expect(response.body.errors[0].msg).toBe(
+                "Password must be at least 8 characters long",
+            );
+            expect(users.length).toBe(0);
+        });
 
-        expect(users).toHaveLength(1);
+        it("Should return 400 status code if role not present", async () => {
+            //arrange
+            const user = {
+                firstName: "a",
+                lastName: "c",
+                email: " b@gmail.com ",
+                password: "********",
+            };
 
-        expect(users[0].role).toBe(userData.role);
-        expect(users[0].email).toBe(userData.email);
-    });
+            //act
+            const response = await api
+                .post(BASE_URL)
+                .set("Cookie", [`accessToken=${authToken};`])
+                .send(user)
+                .expect(400);
+            // assert
 
-    it("should create user with MANAGER role  ", async () => {
-        //arrange
+            expect(response.body.errors[0].msg).toBe("role is missing");
 
-        const userData = {
-            firstName: "a",
-            lastName: "b",
-            email: "femail@gmail.com",
-            password: "********",
-            role: ROLES.MANAGER,
-        };
-        //act
-        await api
-            .post(BASE_URL)
-            .send(userData)
-            .set("Cookie", [`accessToken=${authToken};`])
-            .expect(201);
+            const repo = await connection.getRepository(User);
+            const users = await repo.find();
 
-        //assert
-        const userRepository = connection.getRepository(User);
-
-        const users = await userRepository.find();
-
-        expect(users).toHaveLength(1);
-
-        expect(users[0].role).toBe(ROLES.MANAGER);
-    });
-    it("should return user id in response body json ", async () => {
-        //arrange
-
-        const userData = {
-            firstName: "a",
-            lastName: "b",
-            email: "femail@gmail.com",
-            password: "********",
-            role: ROLES.MANAGER,
-        };
-        //act
-        const response = await api
-            .post(BASE_URL)
-            .send(userData)
-            .set("Cookie", [`accessToken=${authToken};`])
-            .expect("Content-Type", /json/)
-            .expect(201);
-
-        //assert
-        expect(response.body.id).toBe(1);
+            expect(users).toHaveLength(0);
+        });
     });
 });
