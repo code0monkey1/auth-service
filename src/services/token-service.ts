@@ -1,8 +1,8 @@
 import { JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import createHttpError from "http-errors";
-import path from "path";
-import fs from "fs";
+// import path from "path";
+// import fs from "fs";
 import { Config } from "../config";
 import { RefreshToken } from "../entity/RefreshToken";
 import { User } from "../entity/User";
@@ -15,14 +15,11 @@ export class TokenService {
     ) {}
 
     generateAccessToken = (jwtPayload: JwtPayload) => {
-        if (Config.NODE_ENV === "prod" && !Config.PRIVATE_KEY) {
+        if (!Config.PRIVATE_KEY) {
             throw createHttpError(500, "PRIVATE_KEY not set");
         }
 
-        const privateKey: Buffer | string =
-            Config.NODE_ENV === "prod"
-                ? Config.PRIVATE_KEY!
-                : this.getPrivateKey();
+        const privateKey = Config.PRIVATE_KEY;
 
         return jwt.sign(jwtPayload, privateKey, {
             algorithm: "RS256",
@@ -85,17 +82,17 @@ export class TokenService {
         });
     };
 
-    private getPrivateKey = () => {
-        try {
-            return fs.readFileSync(
-                path.join(__dirname, "../../certs/private.pem"),
-            );
-        } catch (e) {
-            const error = createHttpError(
-                500,
-                "Error while reading private key",
-            );
-            throw error;
-        }
-    };
+    // private getPrivateKey = () => {
+    //     try {
+    //         return fs.readFileSync(
+    //             path.join(__dirname, "../../certs/private.pem"),
+    //         );
+    //     } catch (e) {
+    //         const error = createHttpError(
+    //             500,
+    //             "Error while reading private key",
+    //         );
+    //         throw error;
+    //     }
+    // };
 }
