@@ -1,3 +1,4 @@
+# Base image with a name to refer later : builder
 FROM node:18-alpine as builder
 # Set the working directory inside the container
 WORKDIR /app
@@ -17,11 +18,16 @@ ENV NODE_ENV=prod
 WORKDIR /app
 # Copy package.json and package-lock.json to the new stage
 COPY package*.json ./
-# Install only production dependencies
+# Install only production dependencies and ignore scripts that run automatically
 RUN npm ci --ignore-scripts
 # Copy the built application from the builder stage
 COPY --from=builder /app/dist ./
 # Expose the port the app will run on
-EXPOSE 5500
+EXPOSE 3000
 # The command to run our app
 CMD ["node", "src/server.js"]
+
+
+# CREATING PRODUCTION GRADE DOCKER IMAGE : docker build -t mern_prod_test -f docker/prod/Dockerfile .
+
+# RUNNING CONTAINER : 
