@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { HashComparer } from "../application/interfaces/cryptography/HashComparer";
 import { HashGenerator } from "../application/interfaces/cryptography/HashGenerator";
 export class EncryptionService implements HashComparer, HashGenerator {
