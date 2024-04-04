@@ -88,7 +88,7 @@ export class UserService implements UserServiceInterface<UserData, User> {
     findByEmailAndPassword = async (email: string, password: string) => {
         const user = await this.userRepository.findOne({
             where: { email },
-            select: ["hashedPassword"],
+            select: ["hashedPassword", "id", "role"],
         });
 
         const isValidUser =
