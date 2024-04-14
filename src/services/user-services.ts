@@ -110,7 +110,10 @@ export class UserService implements UserServiceInterface<UserData, User> {
     };
 
     findById = async (id: number) => {
-        const user = await this.userRepository.findOne({ where: { id } });
+        const user = await this.userRepository.findOne({
+            where: { id },
+            relations: ["tenant"],
+        });
 
         if (!user) {
             const error = createHttpError(
