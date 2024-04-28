@@ -74,7 +74,7 @@ export class TokenService {
 
     persistRefreshToken = async (user: User, years = 1) => {
         // default set to one year
-        const YEARS = 60 * 60 * 24 * 365 * years;
+        const YEARS = 1000 * 60 * 60 * 24 * 365 * years;
 
         return await this.refreshTokenRepository.save({
             user,
