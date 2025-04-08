@@ -38,7 +38,7 @@ describe("POST /auth/register", () => {
                 email: "c@gmail.com",
                 password: "12345678",
             };
-            await api.post(BASE_URL).send(user).expect(201);
+            const res = await api.post(BASE_URL).send(user).expect(201);
         });
 
         it("should return json format data", async () => {
@@ -116,6 +116,29 @@ describe("POST /auth/register", () => {
 
             //check user is the same
             expect(users[0].role).toBe(user.role);
+        });
+
+        it("should not assign user a manager role", async () => {
+            //arrange
+            const user = {
+                firstName: "a",
+                lastName: "b",
+                email: "c@gmail.com",
+                password: "12345678",
+                role: ROLES.MANAGER,
+            };
+
+            //act
+            await api.post(BASE_URL).send(user).expect("Content-Type", /json/);
+
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+
+            //assert
+            expect(users).toHaveLength(1);
+
+            //check user is the same
+            expect(users[0].role).toBe(ROLES.CUSTOMER);
         });
 
         it("should store hashed password in the database", async () => {

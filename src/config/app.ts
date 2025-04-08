@@ -6,7 +6,7 @@ import "reflect-metadata";
 
 export default (): Express => {
     const app = express();
-
+    // host the static files publically, in the public folder
     app.use(express.static("public"));
     setupMiddlewares(app);
     setupRoutes(app);
