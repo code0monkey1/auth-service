@@ -82,6 +82,8 @@ export class TokenService {
         });
     };
 
+    // can be used during development , but you'll have to pass the private key as a param during deployment
+
     // private getPrivateKey = () => {
     //     try {
     //         return fs.readFileSync(

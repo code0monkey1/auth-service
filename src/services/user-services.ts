@@ -112,7 +112,9 @@ export class UserService implements UserServiceInterface<UserData, User> {
     findById = async (id: number) => {
         const user = await this.userRepository.findOne({
             where: { id },
-            relations: ["tenant"],
+            relations: {
+                tenant: true, // this is used to create a left join between user table and tenant table , through tenantId foreign key
+            },
         });
 
         if (!user) {

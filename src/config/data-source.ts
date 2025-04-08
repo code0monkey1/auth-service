@@ -9,8 +9,8 @@ export const AppDataSource = new DataSource({
     username: Config.DB_USERNAME,
     password: Config.DB_PASSWORD,
     database: Config.DB_NAME,
-    // keep true only in production
-    synchronize: Config.NODE_ENV !== "prod",
+    // keep true only  true in ( development / testing ) , it wipes current db data, & creates new empty tables
+    synchronize: Config.NODE_ENV == "dev" || Config.NODE_ENV == "test",
     logging: false,
     entities: ["src/entity/*.{ts,js}"],
     migrations: ["src/migration/*.{ts,js}"],
